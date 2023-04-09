@@ -103,6 +103,8 @@ in
       shellAliases = {
         ll = "ls -l";
         nixos-edit = "sudo vim /etc/nixos/configuration.nix";
+      } // lib.optionalAttrs (builtins.elem pkgs.tty-clock config.environment.systemPackages) {
+        clock = "tty-clock -btc";
       };
     };
 
