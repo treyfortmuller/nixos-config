@@ -3,10 +3,9 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, lib, ... }:
-let
-in
-{
-  imports = [ 
+let i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
+in {
+  imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
     <home-manager/nixos>
@@ -67,15 +66,14 @@ in
     displayManager.defaultSession = "none+i3";
     windowManager.i3 = {
       enable = true;
-      
+
       # TODO (tff): eliminate the override with 23.05
       # Overriding i3 with the gaps fork for _asethetics_ - version 4.22 has all the
       # gaps features rolled in so we can remove this override with the next upgrade.
       package = pkgs.i3-gaps;
-      extraPackages = with pkgs; [ rofi i3status i3lock ];
+      extraPackages = with pkgs; [ rofi i3status i3lock-color i3lock-wrap ];
     };
   };
-
 
   # Nvidia GPU go brrrrrr
   # services.xserver.videoDrivers = [ "nvidia" ];
@@ -111,9 +109,10 @@ in
       shellAliases = {
         ll = "ls -l";
         nixos-edit = "vim /home/trey/sources/nixos-config/configuration.nix";
-      } // lib.optionalAttrs (builtins.elem pkgs.tty-clock config.environment.systemPackages) {
-        clock = "tty-clock -btc";
-      };
+      } // lib.optionalAttrs
+        (builtins.elem pkgs.tty-clock config.environment.systemPackages) {
+          clock = "tty-clock -btc";
+        };
     };
 
     programs.alacritty = {
@@ -121,6 +120,11 @@ in
       settings = {
         font.normal.family = "JetBrains Mono";
         window.opacity = 0.8;
+        window.padding = {
+          # Pixel padding interior to the window
+          x = 8;
+          y = 8;
+        };
       };
     };
 
@@ -128,10 +132,7 @@ in
       enable = true;
       viAlias = true;
       vimAlias = true;
-      plugins = with pkgs.vimPlugins; [
-        vim-nix
-        rust-vim
-      ];
+      plugins = with pkgs.vimPlugins; [ vim-nix rust-vim ];
       extraConfig = ''
         set number
       '';
@@ -143,10 +144,7 @@ in
       userEmail = "tfortmuller@mac.com";
 
       # Globally ignored
-      ignores = [
-        "*~"
-        "*.swp"
-      ];
+      ignores = [ "*~" "*.swp" ];
 
       aliases = {
         last = "log -1 HEAD";
@@ -170,12 +168,10 @@ in
       # };
     };
   };
-  
+
   # The head of home-manager master has a neovim.defaultEditor option
   # to accomplish this, but its not available in 22.11
-  environment.sessionVariables = rec {
-    EDITOR = "nvim";
-  };
+  environment.sessionVariables = rec { EDITOR = "nvim"; };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -225,14 +221,12 @@ in
           tamasfe.even-better-toml
           matklad.rust-analyzer
           arrterian.nix-env-selector
-        ] ++ vscode-utils.extensionsFromVscodeMarketplace [
-          {
-            name = "cmake-tools";
-            publisher = "ms-vscode";
-            version = "1.12.27";
-            sha256 = "Q5QpVusHt0qgWwbn7Xrgk8hGh/plTx/Z4XwxISnm72s=";
-          }
-        ];
+        ] ++ vscode-utils.extensionsFromVscodeMarketplace [{
+          name = "cmake-tools";
+          publisher = "ms-vscode";
+          version = "1.12.27";
+          sha256 = "Q5QpVusHt0qgWwbn7Xrgk8hGh/plTx/Z4XwxISnm72s=";
+        }];
     })
 
     imagemagick
@@ -262,9 +256,7 @@ in
     meshlab
   ];
 
-  fonts.fonts = with pkgs; [
-    jetbrains-mono
-  ];
+  fonts.fonts = with pkgs; [ jetbrains-mono ];
 
   # TODO (tff): I need to be using home manager to manage my VScode user settings:
   # https://github.com/nix-community/home-manager/blob/master/modules/programs/vscode.nix
@@ -278,6 +270,9 @@ in
   # };
 
   # List services that you want to enable:
+
+  # TODO (tff): should the compositor also be managed by home-manager?
+  services.picom.enable = true;
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
