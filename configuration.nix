@@ -58,20 +58,30 @@ in
   # };
 
   # Enable the X11 windowing system.
-  services.xserver.enable = true;
-  services.xserver.displayManager.defaultSession = "none+i3";
-  services.xserver.windowManager.i3 = {
+  services.xserver = {
     enable = true;
-    extraPackages = with pkgs; [ rofi i3status i3lock ];
+
+    # Configure keymap in X11
+    layout = "us";
+    desktopManager.wallpaper.mode = "fill";
+    displayManager.defaultSession = "none+i3";
+    windowManager.i3 = {
+      enable = true;
+      
+      # TODO (tff): eliminate the override with 23.05
+      # Overriding i3 with the gaps fork for _asethetics_ - version 4.22 has all the
+      # gaps features rolled in so we can remove this override with the next upgrade.
+      package = pkgs.i3-gaps;
+      extraPackages = with pkgs; [ rofi i3status i3lock ];
+    };
   };
+
 
   # Nvidia GPU go brrrrrr
   # services.xserver.videoDrivers = [ "nvidia" ];
   # hardware.opengl.enable = true;
   # hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
 
-  # Configure keymap in X11
-  services.xserver.layout = "us";
   # services.xserver.xkbOptions = "eurosign:e";
 
   # Enable CUPS to print documents.
@@ -84,8 +94,6 @@ in
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
-
-  services.xserver.desktopManager.wallpaper.mode = "fill";
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.trey = {
@@ -102,7 +110,7 @@ in
       enable = true;
       shellAliases = {
         ll = "ls -l";
-        nixos-edit = "sudo vim /etc/nixos/configuration.nix";
+        nixos-edit = "vim /home/trey/sources/nixos-config/configuration.nix";
       } // lib.optionalAttrs (builtins.elem pkgs.tty-clock config.environment.systemPackages) {
         clock = "tty-clock -btc";
       };
@@ -122,7 +130,11 @@ in
       vimAlias = true;
       plugins = with pkgs.vimPlugins; [
         vim-nix
+        rust-vim
       ];
+      extraConfig = ''
+        set number
+      '';
     };
 
     programs.git = {
@@ -147,6 +159,15 @@ in
         pull.rebase = false;
         init.defaultBranch = "master";
       };
+
+      # TODO (tff): this is untested and feels dangerous
+      # xsession.windowManager.i3 = {
+      #   enable = true;
+      #   package = pkgs.i3-gaps;
+      #   config = {
+      #     gaps.inner = 10;
+      #   };
+      # };
     };
   };
   
