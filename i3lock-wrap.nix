@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> { } }:
+{ pkgs, ... }:
 
 # TODO (tff): might want ShellApplication here to avoid
 # the implicit i3lock-color dependency here

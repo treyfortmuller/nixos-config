@@ -4,14 +4,28 @@
 
 { config, pkgs, lib, ... }:
 let
-  i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
   system-font = "JetBrains Mono";
-  
-  mkLiteral = value: {
-    _type = "literal";
-    inherit value;
+  i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
+  vscode-and-friends = pkgs.vscode-with-extensions.override {
+    vscodeExtensions = with pkgs;
+      with vscode-extensions;
+      [
+        ms-vscode-remote.remote-ssh
+        ms-python.python
+        ms-vscode.cpptools
+        bbenoist.nix
+        eamodio.gitlens
+        zxh404.vscode-proto3
+        tamasfe.even-better-toml
+        matklad.rust-analyzer
+        arrterian.nix-env-selector
+      ] ++ vscode-utils.extensionsFromVscodeMarketplace [{
+        name = "cmake-tools";
+        publisher = "ms-vscode";
+        version = "1.12.27";
+        sha256 = "Q5QpVusHt0qgWwbn7Xrgk8hGh/plTx/Z4XwxISnm72s=";
+      }];
   };
-
 in {
   imports = [
     # Include the results of the hardware scan.
@@ -196,7 +210,7 @@ in {
       enable = true;
       terminal = "${pkgs.alacritty}/bin/alacritty";
       font = system-font + " " + builtins.toString 12;
-      theme = ./theme.rasi; 
+      theme = ./theme.rasi;
 
       # TODO (tff): this doesn't seem to be working
       # plugins = with pkgs; [ rofi-power-menu ];
@@ -242,27 +256,7 @@ in {
     figlet
     cmatrix
     cbonsai
-
-    (vscode-with-extensions.override {
-      vscodeExtensions = with vscode-extensions;
-        [
-          ms-vscode-remote.remote-ssh
-          ms-python.python
-          ms-vscode.cpptools
-          bbenoist.nix
-          eamodio.gitlens
-          zxh404.vscode-proto3
-          tamasfe.even-better-toml
-          matklad.rust-analyzer
-          arrterian.nix-env-selector
-        ] ++ vscode-utils.extensionsFromVscodeMarketplace [{
-          name = "cmake-tools";
-          publisher = "ms-vscode";
-          version = "1.12.27";
-          sha256 = "Q5QpVusHt0qgWwbn7Xrgk8hGh/plTx/Z4XwxISnm72s=";
-        }];
-    })
-
+    vscode-and-friends
     imagemagick
     lsof
     gh
