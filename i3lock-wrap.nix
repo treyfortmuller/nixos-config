@@ -23,4 +23,3 @@ pkgs.writeShellScriptBin "i3lock-wrap" ''
     --date-size 48                          \
     --date-pos "tx-0:ty+75"
 ''
-

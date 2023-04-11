@@ -6,6 +6,8 @@
 let
   system-font = "JetBrains Mono";
   i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
+
+  # TODO (tff): manage with home-manager
   vscode-and-friends = pkgs.vscode-with-extensions.override {
     vscodeExtensions = with pkgs;
       with vscode-extensions;
