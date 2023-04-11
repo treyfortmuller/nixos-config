@@ -3,7 +3,15 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, lib, ... }:
-let i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
+let
+  i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
+  system-font = "JetBrains Mono";
+  
+  mkLiteral = value: {
+    _type = "literal";
+    inherit value;
+  };
+
 in {
   imports = [
     # Include the results of the hardware scan.
@@ -118,7 +126,7 @@ in {
     programs.alacritty = {
       enable = true;
       settings = {
-        font.normal.family = "JetBrains Mono";
+        font.normal.family = system-font;
 
         # Alacritty can fade just its background rather than the text in the foreground
         # which is preferrable, we'll apply focused/unfocused opacity control via picom.
@@ -160,16 +168,16 @@ in {
         pull.rebase = false;
         init.defaultBranch = "master";
       };
-
-      # TODO (tff): this is untested and feels dangerous
-      # xsession.windowManager.i3 = {
-      #   enable = true;
-      #   package = pkgs.i3-gaps;
-      #   config = {
-      #     gaps.inner = 10;
-      #   };
-      # };
     };
+
+    # TODO (tff): this is untested and feels dangerous
+    # xsession.windowManager.i3 = {
+    #   enable = true;
+    #   package = pkgs.i3-gaps;
+    #   config = {
+    #     gaps.inner = 10;
+    #   };
+    # };
 
     services.picom = {
       enable = true;
@@ -183,6 +191,20 @@ in {
         "90:class_g = 'Alacritty' && !focused"
       ];
     };
+
+    programs.rofi = {
+      enable = true;
+      terminal = "${pkgs.alacritty}/bin/alacritty";
+      font = system-font + " " + builtins.toString 12;
+      theme = ./theme.rasi; 
+
+      # TODO (tff): this doesn't seem to be working
+      # plugins = with pkgs; [ rofi-power-menu ];
+      extraConfig = {
+        display-drun = "Applications";
+        display-window = "Windows";
+      };
+    };
   };
 
   # The head of home-manager master has a neovim.defaultEditor option
@@ -192,12 +214,8 @@ in {
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    # this is covered by home-manager and we've installed neovim... not sure what this would try to do now.
-    # vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
     ack
-    # alacritty
-    git
     chromium
     spotify
     tty-clock
