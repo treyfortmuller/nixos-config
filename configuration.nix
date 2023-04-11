@@ -119,7 +119,10 @@ in {
       enable = true;
       settings = {
         font.normal.family = "JetBrains Mono";
-        window.opacity = 0.8;
+
+        # Alacritty can fade just its background rather than the text in the foreground
+        # which is preferrable, we'll apply focused/unfocused opacity control via picom.
+        window.opacity = 0.9;
         window.padding = {
           # Pixel padding interior to the window
           x = 8;
@@ -166,6 +169,19 @@ in {
       #     gaps.inner = 10;
       #   };
       # };
+    };
+
+    services.picom = {
+      enable = true;
+      fade = false;
+      activeOpacity = 1.0;
+      inactiveOpacity = 1.0;
+
+      # Only applying opacity rules to terminal windows
+      opacityRules = [
+        "100:class_g = 'Alacritty' && focused"
+        "90:class_g = 'Alacritty' && !focused"
+      ];
     };
   };
 
@@ -270,10 +286,6 @@ in {
   # };
 
   # List services that you want to enable:
-
-  # TODO (tff): should the compositor also be managed by home-manager?
-  services.picom.enable = true;
-
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
