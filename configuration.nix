@@ -1,6 +1,4 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
+# Base configuration shared across all machines.
 
 { config, pkgs, lib, ... }:
 let
@@ -30,24 +28,12 @@ let
   };
 in {
   imports = [
-    # Include the results of the hardware scan.
-    ./work/hardware-configuration.nix
     <home-manager/nixos>
   ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-
-  # Sound card kernel module configuration.
-  # TODO (tff): more hardware specifics
-  boot.extraModprobeConfig = ''
-    options snd slots=snd_hda_intel
-    options snd_hda_intel enable=0,1
-    options i2c-stub chip_addr=0x20
-  '';
-  boot.blacklistedKernelModules = [ "snd_pcsp" ];
-  boot.kernelModules = [ "i2c-dev" "i2c-stub" ];
 
   nixpkgs.config.allowUnfree = true;
 
@@ -62,11 +48,6 @@ in {
   security.sudo.extraConfig = ''
     Defaults        timestamp_timeout=10
   '';
-
-  # TODO (tff): more hardware specifics
-  networking.useDHCP = false;
-  networking.interfaces.enp59s0.useDHCP = true;
-  networking.interfaces.wlo1.useDHCP = true;
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
@@ -90,9 +71,6 @@ in {
   services.xserver = {
     enable = true;
 
-    # TODO (tff): needs to be hardware specific
-    videoDrivers = [ "nvidia" ];
-
     # Configure keymap in X11
     layout = "us";
     desktopManager.wallpaper.mode = "fill";
@@ -107,11 +85,6 @@ in {
       extraPackages = with pkgs; [ rofi i3status i3lock-color i3lock-wrap ];
     };
   };
-
-  # Nvidia GPU go brrrrrr
-  # TODO (tff): Move this to hardware specifics...
-  hardware.opengl.enable = true;
-  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
 
   # services.xserver.xkbOptions = "eurosign:e";
 
@@ -326,10 +299,6 @@ in {
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-
-  # TODO (tff): will need to make sure this is allowed to be different between configurations.
-  system.stateVersion = "21.05"; # Did you read the comment?
-
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 }
 
