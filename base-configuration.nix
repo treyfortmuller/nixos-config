@@ -270,6 +270,7 @@ in {
           };
         };
         extraConfig = ''
+          bindsym --release Print exec import ~/screenshots/$(date --iso-8601=seconds).png;
           default_border pixel 3
         '';
       };
