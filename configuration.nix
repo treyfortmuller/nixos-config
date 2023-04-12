@@ -91,16 +91,11 @@ in {
       desktopManager.wallpaper.mode = "fill";
       displayManager.defaultSession = "none+i3";
 
-      # TODO (tff): seems like this is necessary to keep around despite all the config
+      # Seems like this is necessary to keep around despite all the config
       # being applied by home-manager.
       windowManager.i3 = {
         enable = true;
-
-        #   # TODO (tff): eliminate the override with 23.05
-        #   # Overriding i3 with the gaps fork for _asethetics_ - version 4.22 has all the
-        #   # gaps features rolled in so we can remove this override with the next upgrade.
         package = pkgs.i3-gaps;
-        #   extraPackages = with pkgs; [ rofi i3status i3lock-color i3lock-wrap ];
       };
     };
 
@@ -191,7 +186,6 @@ in {
         };
       };
 
-      # This config will apply changes to xsession.windowManager
       xsession.windowManager.i3 = {
         enable = true;
 
@@ -204,17 +198,14 @@ in {
           menu = cfg.menu;
         in {
           modifier = "Mod4";
-
-          # TODO (tff): this doesn't seem to be applying to the nagbar or status bar.
+          gaps.inner = 20;
+          terminal = "alacritty";
+          menu = "rofi -show drun";
           fonts = {
             names = [ system-font ];
             style = "Regular";
             size = 9.0;
           };
-
-          gaps.inner = 20;
-          terminal = "alacritty";
-          menu = "rofi -show drun";
           modes.resize = lib.mkOptionDefault {
             # Return, Esc, or Mod+r again to escape resize mode
             "Return" = "mode default";
@@ -329,26 +320,43 @@ in {
       rofi
       i3status
       i3lock-color
-      i3lock-wrap # TODO (tff): i3lock-wrap should just provide program options to enable maybe
+      i3lock-wrap
+
+      # Thirdparty native
+      zoom-us
+      chromium
+      spotify
+      spotify-tui
+      slack
+      qgroundcontrol
+      
+      # Media
+      vlc
+      ffmpeg
+      imagemagick
+      simplescreenrecorder
+      meshlab
+      ffmpeg-full
+      
+      # Some nonsense and shenanigans
+      figlet
+      cmatrix
+      tty-clock
+      cbonsai
+      neofetch
+      
+      # Dev
+      nixfmt
+      vscode-and-friends
+      gh
+      nixfmt
+      picocom
 
       # Tools
       wget
       ack
-      chromium
-      spotify
-      tty-clock
-      slack
       xclip
       fzf
-      neofetch
-      tmux
-      htop
-      jq
-      mosh
-      nixfmt
-      libqalculate
-      vlc
-      ffmpeg
       i2c-tools
       psmisc
       usbutils
@@ -356,36 +364,25 @@ in {
       tree
       ethtool
       grpcurl
-      # Some nonsense and shenanigans
-      figlet
-      cmatrix
-      cbonsai
-      vscode-and-friends
-      imagemagick
-      lsof
-      gh
-      nixfmt
-      picocom
-      zoom-us
-      qgroundcontrol
-      unzip
-      tcpdump
-      arp-scan
-      cryptsetup
-      ffmpeg-full
-      wireshark
-      wireshark-cli
-      nix-tree
-      socat
-      spotify-tui
+      tmux
+      htop
+      jq
+      mosh
       fzf
       bat
       ranger
       awscli2
       cntr
       ripgrep
-      simplescreenrecorder
-      meshlab
+      lsof      
+      unzip
+      tcpdump
+      arp-scan
+      cryptsetup
+      wireshark
+      wireshark-cli
+      nix-tree
+      socat
     ];
 
     fonts.fonts = with pkgs; [ jetbrains-mono ];
