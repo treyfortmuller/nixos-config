@@ -189,6 +189,7 @@ in {
       extraConfig = {
         pull.rebase = false;
         init.defaultBranch = "master";
+        push.autoSetupRemote = true;
       };
     };
 
