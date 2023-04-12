@@ -230,13 +230,15 @@ in {
           };
 
           keybindings = lib.mkOptionDefault {
-            # TODO (tff): might want to sub in the actual nix store path here...
-            # and why doesn't config.xsession.windowManager.i3.config.modifier exist?
             "${mod}+Escape" = "exec ${i3lock-wrap}/bin/i3lock-wrap";
             "${mod}+Tab" = "exec rofi -show window";
             "${mod}+s" = "exec rofi -show ssh";
             "${mod}+d" = "focus mode_toggle";
             "${mod}+space" = "exec" + " " + menu;
+            "${mod}+Shift+e" = ''
+              exec ${pkgs.i3-gaps}/bin/i3-nagbar -f 'pango:${system-font} 11' \
+              -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'
+            '';
 
             # TODO (tff): Disable stacking and tabbed layouts
             # "${mod}+w" = ""; <- remove this from the attrset defaults
