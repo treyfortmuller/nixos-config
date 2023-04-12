@@ -40,6 +40,9 @@ in {
   hardware.pulseaudio.enable = true;
   hardware.pulseaudio.support32Bit = true;
 
+  environment.systemPackages = with pkgs; [
+    google-chrome
+  ];
 
   # TODO (tff): will need to make sure this is allowed to be different between configurations.
   system.stateVersion = "21.05"; # Did you read the comment?
