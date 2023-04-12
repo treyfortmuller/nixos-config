@@ -31,7 +31,7 @@ let
 in {
   imports = [
     # Include the results of the hardware scan.
-    ./hardware-configuration.nix
+    ./work/hardware-configuration.nix
     <home-manager/nixos>
   ];
 
@@ -40,13 +40,14 @@ in {
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Sound card kernel module configuration.
-  # boot.extraModprobeConfig = ''
-  #   options snd slots=snd_hda_intel
-  #   options snd_hda_intel enable=0,1
-  #   options i2c-stub chip_addr=0x20
-  # '';
-  # boot.blacklistedKernelModules = [ "snd_pcsp" ];
-  # boot.kernelModules = [ "i2c-dev" "i2c-stub" ];
+  # TODO (tff): more hardware specifics
+  boot.extraModprobeConfig = ''
+    options snd slots=snd_hda_intel
+    options snd_hda_intel enable=0,1
+    options i2c-stub chip_addr=0x20
+  '';
+  boot.blacklistedKernelModules = [ "snd_pcsp" ];
+  boot.kernelModules = [ "i2c-dev" "i2c-stub" ];
 
   nixpkgs.config.allowUnfree = true;
 
@@ -61,6 +62,11 @@ in {
   security.sudo.extraConfig = ''
     Defaults        timestamp_timeout=10
   '';
+
+  # TODO (tff): more hardware specifics
+  networking.useDHCP = false;
+  networking.interfaces.enp59s0.useDHCP = true;
+  networking.interfaces.wlo1.useDHCP = true;
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
@@ -84,6 +90,9 @@ in {
   services.xserver = {
     enable = true;
 
+    # TODO (tff): needs to be hardware specific
+    videoDrivers = [ "nvidia" ];
+
     # Configure keymap in X11
     layout = "us";
     desktopManager.wallpaper.mode = "fill";
@@ -100,9 +109,9 @@ in {
   };
 
   # Nvidia GPU go brrrrrr
-  # services.xserver.videoDrivers = [ "nvidia" ];
-  # hardware.opengl.enable = true;
-  # hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
+  # TODO (tff): Move this to hardware specifics...
+  hardware.opengl.enable = true;
+  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
 
   # services.xserver.xkbOptions = "eurosign:e";
 
@@ -110,12 +119,9 @@ in {
   # services.printing.enable = true;
 
   # Enable sound.
-  # sound.enable = true;
-  # hardware.pulseaudio.enable = true;
-  # hardware.pulseaudio.support32Bit = true;
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
+  sound.enable = true;
+  hardware.pulseaudio.enable = true;
+  hardware.pulseaudio.support32Bit = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.trey = {
@@ -284,6 +290,7 @@ in {
     ripgrep
     simplescreenrecorder
     meshlab
+    google-chrome
   ];
 
   fonts.fonts = with pkgs; [ jetbrains-mono ];
@@ -318,7 +325,9 @@ in {
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "22.11"; # Did you read the comment?
+
+  # TODO (tff): will need to make sure this is allowed to be different between configurations.
+  system.stateVersion = "21.05"; # Did you read the comment?
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 }
