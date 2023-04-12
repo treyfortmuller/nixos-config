@@ -125,7 +125,7 @@ in {
         enable = true;
         shellAliases = {
           ll = "ls -l";
-          nixos-edit = "vim /home/trey/sources/nixos-config/configuration.nix";
+          nixos-edit = "vim /home/trey/sources/nixos-config/base-configuration.nix";
         } // lib.optionalAttrs
           (builtins.elem pkgs.tty-clock config.environment.systemPackages) {
             clock = "tty-clock -btc";
