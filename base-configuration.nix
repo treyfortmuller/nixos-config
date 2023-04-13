@@ -135,6 +135,7 @@ in {
       programs.alacritty = {
         enable = true;
         settings = {
+          env.TERM = "xterm-256color";
           font.normal.family = system-font;
 
           # Alacritty can fade just its background rather than the text in the foreground
