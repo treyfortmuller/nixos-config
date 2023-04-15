@@ -4,10 +4,7 @@
 { config, pkgs, lib, ... }:
 let
 in {
-  imports = [
-    ../base-configuration.nix
-    ./hardware-configuration.nix
-  ];
+  imports = [ ../base-configuration.nix ./hardware-configuration.nix ];
 
   config = {
     # This value determines the NixOS release from which the default
@@ -21,10 +18,10 @@ in {
     # Enable sound.
     sound.enable = true;
     hardware.pulseaudio.enable = true;
-    
+
     # Disable the PC speaker "audio card"
     boot.blacklistedKernelModules = [ "snd_pcsp" ];
-    
+
     # Sound card kernel module configuration.
     # boot.extraModprobeConfig = ''
     #   options snd slots=snd_hda_intel
