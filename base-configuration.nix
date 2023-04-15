@@ -125,7 +125,8 @@ in {
         enable = true;
         shellAliases = {
           ll = "ls -l";
-          nixos-edit = "vim /home/trey/sources/nixos-config/base-configuration.nix";
+          nixos-edit =
+            "vim /home/trey/sources/nixos-config/base-configuration.nix";
         } // lib.optionalAttrs
           (builtins.elem pkgs.tty-clock config.environment.systemPackages) {
             clock = "tty-clock -btc";
@@ -229,6 +230,17 @@ in {
             # "${mod}+w" = ""; <- remove this from the attrset defaults
             "${mod}+Shift+f" = "floating toggle";
             "${mod}+BackSpace" = "split toggle";
+
+            # TODO (tff): get the volume in the i3 status bar and refresh it
+            # Volume control
+            "XF86AudioRaiseVolume" =
+              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10%";
+            "XF86AudioLowerVolume" =
+              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10%";
+            "XF86AudioMute" =
+              "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
+            "XF86AudioMicMute" =
+              "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
           };
 
           colors = {
@@ -302,6 +314,17 @@ in {
           display-window = "Windows";
         };
       };
+
+      services.spotifyd = {
+        enable = true;
+        settings = {
+          global = {
+            username = "tfortmuller";
+            password_cmd = "/home/trey/.config/spotify-secret";
+            device_name = "nixos";
+          };
+        };
+      };
     };
 
     # The head of home-manager master has a neovim.defaultEditor option
@@ -320,7 +343,6 @@ in {
       # Thirdparty native
       zoom-us
       chromium
-      spotify
       spotify-tui
       slack
       qgroundcontrol
@@ -344,7 +366,6 @@ in {
       nixfmt
       vscode-and-friends
       gh
-      nixfmt
       picocom
 
       # Tools
