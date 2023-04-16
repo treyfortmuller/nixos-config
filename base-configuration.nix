@@ -4,6 +4,7 @@
 let
   system-font = "JetBrains Mono";
   i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
+  nixpkgs-cfg-path = ./nixpkgs-config.nix;
 
   # TODO (tff): manage with home-manager
   vscode-and-friends = pkgs.vscode-with-extensions.override {
@@ -121,6 +122,12 @@ in {
     home-manager.users.trey = { pkgs, ... }: {
       home.stateVersion = "22.11";
 
+      # The config.nixpkgs.config option allow applies to system instantiations
+      # via nixos-rebuild, this will allow us to install unfree packages via nix-shell, etc.
+      # It manages the ~/.config/nixpkgs/config.nix file.
+      nixpkgs.config = import nixpkgs-cfg-path;
+      xdg.configFile."nixpkgs/config.nix".source = nixpkgs-cfg-path;
+
       programs.bash = {
         enable = true;
         shellAliases = {
@@ -235,9 +242,9 @@ in {
             # TODO (tff): get the volume in the i3 status bar and refresh it
             # Volume control
             "XF86AudioRaiseVolume" =
-              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10%";
+              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
             "XF86AudioLowerVolume" =
-              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10%";
+              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
             "XF86AudioMute" =
               "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
             "XF86AudioMicMute" =
@@ -320,8 +327,8 @@ in {
         enable = true;
         settings = {
           global = {
-            username = "tfortmuller";
-            password_cmd = "/home/trey/.config/spotify-secret";
+            username_cmd = "${pkgs._1password}/bin/op item get spotify --fields username";
+            password_cmd = "${pkgs._1password}/bin/op item get spotify --fields password";
             device_name = "nixos";
           };
         };
@@ -335,6 +342,8 @@ in {
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     environment.systemPackages = with pkgs; [
+      _1password
+
       # Window manager and desktop enviornment
       rofi
       i3status
