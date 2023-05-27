@@ -356,6 +356,7 @@ in {
       spotify-tui
       slack
       qgroundcontrol
+      signal-desktop
 
       # Media
       vlc
