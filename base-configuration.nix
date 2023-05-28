@@ -101,7 +101,8 @@ in {
     # services.xserver.xkbOptions = "eurosign:e";
 
     # Enable CUPS to print documents.
-    # services.printing.enable = true;
+    services.printing.enable = true;
+    services.printing.drivers = with pkgs; [ gutenprint ];
 
     # Enable sound.
     # sound.enable = true;
