@@ -35,5 +35,30 @@
       };
     };
   };
+
+  # Some sweet configuration tips: https://nixos.wiki/wiki/Grafana
+  services.grafana = {
+    enable = true;
+    settings = {
+      # auth.anonymous.enabled = true;
+      security.disable_gravatar = true;
+      "auth.anonymous".enabled = true;
+
+      server = {
+        # Listening Address
+        http_addr = "127.0.0.1";
+        
+        # and Port
+        http_port = 3000;
+
+        # TODO (tff): There should probably be a default dashboard to auto-login to
+        # home_page = "";
+
+        # Grafana needs to know on which domain and URL it's running
+        # domain = "your.domain";
+        # root_url = "https://your.domain/grafana/"; # Not needed if it is `https://your.domain/`
+      };
+    };
+  };
 }
 
