@@ -18,5 +18,22 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "23.05"; # Did you read the comment?
 
+  # System observability delivered by telegraf input plugins, stored locally
+  # with a retention policy on a Prometheus instance, visualized via Grafana.
+  services.telegraf = {
+    enable = true;
+    extraConfig = {
+      inputs = {
+        system = { };
+        temp = { };
+      };
+      outputs = {
+        file = {
+          files = [ "/tmp/metrics.out" ];
+          data_format = "json";
+        };
+      };
+    };
+  };
 }
 
