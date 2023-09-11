@@ -121,7 +121,7 @@ in {
     # home-manager configuration
     home-manager.useGlobalPkgs = true;
     home-manager.users.trey = { pkgs, ... }: {
-      home.stateVersion = "22.11";
+      home.stateVersion = config.system.stateVersion;
 
       # The config.nixpkgs.config option allow applies to system instantiations
       # via nixos-rebuild, this will allow us to install unfree packages via nix-shell, etc.
