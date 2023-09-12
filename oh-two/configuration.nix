@@ -10,6 +10,8 @@
     ./hardware-configuration.nix
   ];
 
+  environment.systemPackages = with pkgs; [ influxdb ];
+
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It's perfectly fine and recommended to leave
@@ -32,9 +34,19 @@
           files = [ "/tmp/metrics.out" ];
           data_format = "json";
         };
+        influxdb = {
+          urls = [ "http://localhost:8086" ];
+          database = "telegraf";
+        };
       };
     };
   };
+
+  services.influxdb = { enable = true; };
+
+  # services.prometheus = {
+  #   enable = true;
+  # };
 
   # Some sweet configuration tips: https://nixos.wiki/wiki/Grafana
   services.grafana = {
@@ -47,7 +59,7 @@
       server = {
         # Listening Address
         http_addr = "127.0.0.1";
-        
+
         # and Port
         http_port = 3000;
 
@@ -57,6 +69,19 @@
         # Grafana needs to know on which domain and URL it's running
         # domain = "your.domain";
         # root_url = "https://your.domain/grafana/"; # Not needed if it is `https://your.domain/`
+      };
+    };
+
+    provision = {
+      enable = true;
+      datasources.settings = {
+        datasources = [{
+          name = "InfluxDB";
+          database = "telegraf";
+          type = "influxdb";
+          url = "http://localhost:8086";
+          editable = true;
+        }];
       };
     };
   };
