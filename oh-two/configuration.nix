@@ -10,7 +10,10 @@
     ./hardware-configuration.nix
   ];
 
-  environment.systemPackages = with pkgs; [ influxdb ];
+  environment.systemPackages = with pkgs; [ 
+    influxdb
+    gpsd
+  ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
@@ -19,6 +22,15 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "23.05"; # Did you read the comment?
+
+  services.gpsd = {
+    enable = true;
+
+    # TODO (tff): need a udev rule to make sure this thing shows up at ACM0 all the time
+    devices = [ "/dev/ttyACM0" ];
+    port = 2947;
+    debugLevel = 3;
+  };
 
   # System observability delivered by telegraf input plugins, stored locally
   # with a retention policy on a Prometheus instance, visualized via Grafana.
