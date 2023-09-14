@@ -37,6 +37,12 @@
   services.telegraf = {
     enable = true;
     extraConfig = {
+      # Speed up the sampling and flush to output for more immediate
+      # updates in grafana.
+      agent = {
+        interval = "5s";
+        flush_interval = "5s";
+      };
       inputs = {
         system = { };
         temp = { };
