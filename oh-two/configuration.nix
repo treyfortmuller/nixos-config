@@ -50,7 +50,7 @@
         # disk = { };
         # diskio = { };
         # ethtool = { };
-        # mem = { };
+        mem = { };
         net = { };
 
         # This is not built into telegraf, need to figure out how to add it.
