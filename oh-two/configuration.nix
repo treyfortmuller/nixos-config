@@ -46,6 +46,20 @@
       inputs = {
         system = { };
         temp = { };
+        # cpu = { };
+        # disk = { };
+        # diskio = { };
+        # ethtool = { };
+        # mem = { };
+        net = { };
+
+        # This is not built into telegraf, need to figure out how to add it.
+        # systemd_timings = { };
+
+        # This is a ton of data...
+        # systemd_units = { };
+        # This one will need some tuning...
+        # procstat = { };
       };
       outputs = {
         file = {
