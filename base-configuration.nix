@@ -20,6 +20,8 @@ let
         tamasfe.even-better-toml
         matklad.rust-analyzer
         arrterian.nix-env-selector
+        streetsidesoftware.code-spell-checker
+        ms-toolsai.jupyter
       ] ++ vscode-utils.extensionsFromVscodeMarketplace [{
         name = "cmake-tools";
         publisher = "ms-vscode";
@@ -48,9 +50,10 @@ in {
 
     # networking.hostName = "nixos"; # Define your hostname.
     # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+    networking.networkmanager.enable = true;
 
     # Set your time zone.
-    time.timeZone = "America/Los_Angeles";
+    time.timeZone = "Europe/London";
 
     # TODO (tff): I dont think this is working
     # Make the sudo password validity timeout a bit longer
@@ -75,6 +78,8 @@ in {
     #   font = "Lat2-Terminus16";
     #   keyMap = "us";
     # };
+
+    services.globalprotect.enable = true;
 
     # Enable the X11 windowing system.
     services.xserver = {
@@ -115,7 +120,7 @@ in {
     # Define a user account. Don't forget to set a password with ‘passwd’.
     users.users.trey = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "dialout" "audio" ];
+      extraGroups = [ "wheel" "dialout" "audio" "docker" ];
     };
 
     # home-manager configuration
@@ -132,9 +137,10 @@ in {
       programs.bash = {
         enable = true;
         shellAliases = {
-          ll = "ls -l";
+          ll = "ls -l -h";
           nixos-edit =
             "vim /home/trey/sources/nixos-config/base-configuration.nix";
+          csv = "column -s, -t ";
         } // lib.optionalAttrs
           (builtins.elem pkgs.tty-clock config.environment.systemPackages) {
             clock = "tty-clock -btc";
@@ -336,6 +342,9 @@ in {
       };
     };
 
+    # TODO (tff): get rid of docker if you dont need it...
+    virtualisation.docker.enable = true;
+
     # The head of home-manager master has a neovim.defaultEditor option
     # to accomplish this, but its not available in 22.11
     environment.sessionVariables = rec { EDITOR = "nvim"; };
@@ -358,6 +367,7 @@ in {
       slack
       qgroundcontrol
       signal-desktop
+      globalprotect-openconnect
 
       # Media
       vlc
@@ -376,6 +386,7 @@ in {
 
       # Dev
       nixfmt
+      nixpkgs-fmt
       vscode-and-friends
       gh
       picocom
@@ -410,7 +421,9 @@ in {
       wireshark
       wireshark-cli
       nix-tree
+      nix-diff
       socat
+      remmina
     ];
 
     fonts.fonts = with pkgs; [ jetbrains-mono ];
