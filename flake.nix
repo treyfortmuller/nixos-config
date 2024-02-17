@@ -10,15 +10,16 @@
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs: {
     nixosConfigurations = {
-        kearsarge = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [
-            ./msi_trident/configuration.nix
-          ];
-          specialArgs = { inherit inputs; };
-        };
+      # TODO (tff): currently a placeholder
+      kearsarge = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./msi_trident/configuration.nix
+        ];
+        specialArgs = { inherit inputs; };
+      };
 
-        # TODO... more of them
+      # TODO... more of them
     };
 
     nixosModules = {

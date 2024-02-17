@@ -1,6 +1,6 @@
 # Base configuration shared across all machines.
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 let
   system-font = "JetBrains Mono";
   i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
@@ -29,7 +29,12 @@ let
         sha256 = "Q5QpVusHt0qgWwbn7Xrgk8hGh/plTx/Z4XwxISnm72s=";
       }];
   };
-in {
+in
+{
+  imports = [
+    inputs.home-manager.nixosModules.home-manager
+  ];
+
   config = {
     # Use the systemd-boot EFI boot loader.
     boot.loader.systemd-boot.enable = true;
@@ -140,7 +145,8 @@ in {
             "vim /home/trey/sources/nixos-config/base-configuration.nix";
           csv = "column -s, -t ";
         } // lib.optionalAttrs
-          (builtins.elem pkgs.tty-clock config.environment.systemPackages) {
+          (builtins.elem pkgs.tty-clock config.environment.systemPackages)
+          {
             clock = "tty-clock -btc";
           };
       };
@@ -200,101 +206,103 @@ in {
         # Gaps for the _asethetic_, note this override can be removed with the next
         # NixOS release. i3-gaps has since merged to mainline i3.
         package = pkgs.i3-gaps;
-        config = let
-          cfg = config.home-manager.users.trey.xsession.windowManager.i3.config;
-          mod = cfg.modifier;
-          menu = cfg.menu;
-        in {
-          modifier = "Mod4";
-          gaps.inner = 20;
-          terminal = "alacritty";
-          menu = "rofi -show drun";
-          fonts = {
-            names = [ system-font ];
-            style = "Regular";
-            size = 9.0;
+        config =
+          let
+            cfg = config.home-manager.users.trey.xsession.windowManager.i3.config;
+            mod = cfg.modifier;
+            menu = cfg.menu;
+          in
+          {
+            modifier = "Mod4";
+            gaps.inner = 20;
+            terminal = "alacritty";
+            menu = "rofi -show drun";
+            fonts = {
+              names = [ system-font ];
+              style = "Regular";
+              size = 9.0;
+            };
+            modes.resize = lib.mkOptionDefault {
+              # Return, Esc, or Mod+r again to escape resize mode
+              "Return" = "mode default";
+              "Escape" = "mode default";
+              "${mod}+r" = "mode default";
+
+              # Left to shrink, right to grow in width
+              # Up to shrink, down to grow in height
+              "Left" = "resize shrink width 75 px";
+              "Right" = "resize grow width 75 px";
+              "Down" = "resize grow height 75 px";
+              "Up" = "resize shrink height 75 px";
+            };
+
+            keybindings = lib.mkOptionDefault {
+              "${mod}+Escape" = "exec ${i3lock-wrap}/bin/i3lock-wrap";
+              "${mod}+Tab" = "exec rofi -show window";
+              "${mod}+s" = "exec rofi -show ssh";
+              "${mod}+d" = "focus mode_toggle";
+              "${mod}+space" = "exec" + " " + menu;
+              "${mod}+Shift+e" = ''
+                exec ${pkgs.i3-gaps}/bin/i3-nagbar -f 'pango:${system-font} 11' \
+                -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'
+              '';
+
+              # TODO (tff): Disable stacking and tabbed layouts
+              # "${mod}+w" = ""; <- remove this from the attrset defaults
+              "${mod}+Shift+f" = "floating toggle";
+              "${mod}+BackSpace" = "split toggle";
+
+              # TODO (tff): get the volume in the i3 status bar and refresh it
+              # Volume control
+              "XF86AudioRaiseVolume" =
+                "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
+              "XF86AudioLowerVolume" =
+                "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
+              "XF86AudioMute" =
+                "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
+              "XF86AudioMicMute" =
+                "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
+            };
+
+            colors = {
+              background = "#ffffff";
+              focused = {
+                border = "#49abf5";
+                background = "#285577";
+                text = "#ffffff";
+                indicator = "#9cccf0";
+                childBorder = "#49abf5";
+              };
+              focusedInactive = {
+                border = "#333333";
+                background = "#5f676a";
+                text = "#ffffff";
+                indicator = "#484e50";
+                childBorder = "#5f676a";
+              };
+              unfocused = {
+                border = "#333333";
+                background = "#222222";
+                text = "#888888";
+                indicator = "#292d2e";
+                childBorder = "#222222";
+              };
+              urgent = {
+                border = "#2f343a";
+                background = "#900000";
+                text = "#ffffff";
+                indicator = "#900000";
+                childBorder = "#900000";
+              };
+              placeholder = {
+                border = "#000000";
+                background = "#0c0c0c";
+                text = "#ffffff";
+                indicator = "#000000";
+                childBorder = "#0c0c0c";
+              };
+            };
           };
-          modes.resize = lib.mkOptionDefault {
-            # Return, Esc, or Mod+r again to escape resize mode
-            "Return" = "mode default";
-            "Escape" = "mode default";
-            "${mod}+r" = "mode default";
-
-            # Left to shrink, right to grow in width
-            # Up to shrink, down to grow in height
-            "Left" = "resize shrink width 75 px";
-            "Right" = "resize grow width 75 px";
-            "Down" = "resize grow height 75 px";
-            "Up" = "resize shrink height 75 px";
-          };
-
-          keybindings = lib.mkOptionDefault {
-            "${mod}+Escape" = "exec ${i3lock-wrap}/bin/i3lock-wrap";
-            "${mod}+Tab" = "exec rofi -show window";
-            "${mod}+s" = "exec rofi -show ssh";
-            "${mod}+d" = "focus mode_toggle";
-            "${mod}+space" = "exec" + " " + menu;
-            "${mod}+Shift+e" = ''
-              exec ${pkgs.i3-gaps}/bin/i3-nagbar -f 'pango:${system-font} 11' \
-              -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'
-            '';
-
-            # TODO (tff): Disable stacking and tabbed layouts
-            # "${mod}+w" = ""; <- remove this from the attrset defaults
-            "${mod}+Shift+f" = "floating toggle";
-            "${mod}+BackSpace" = "split toggle";
-
-            # TODO (tff): get the volume in the i3 status bar and refresh it
-            # Volume control
-            "XF86AudioRaiseVolume" =
-              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
-            "XF86AudioLowerVolume" =
-              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
-            "XF86AudioMute" =
-              "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
-            "XF86AudioMicMute" =
-              "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
-          };
-
-          colors = {
-            background = "#ffffff";
-            focused = {
-              border = "#49abf5";
-              background = "#285577";
-              text = "#ffffff";
-              indicator = "#9cccf0";
-              childBorder = "#49abf5";
-            };
-            focusedInactive = {
-              border = "#333333";
-              background = "#5f676a";
-              text = "#ffffff";
-              indicator = "#484e50";
-              childBorder = "#5f676a";
-            };
-            unfocused = {
-              border = "#333333";
-              background = "#222222";
-              text = "#888888";
-              indicator = "#292d2e";
-              childBorder = "#222222";
-            };
-            urgent = {
-              border = "#2f343a";
-              background = "#900000";
-              text = "#ffffff";
-              indicator = "#900000";
-              childBorder = "#900000";
-            };
-            placeholder = {
-              border = "#000000";
-              background = "#0c0c0c";
-              text = "#ffffff";
-              indicator = "#000000";
-              childBorder = "#0c0c0c";
-            };
-          };
-        };
         extraConfig = ''
           bindsym --release Print exec import ~/screenshots/$(date --iso-8601=seconds).png;
           default_border pixel 3
