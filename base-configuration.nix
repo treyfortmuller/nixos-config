@@ -30,8 +30,6 @@ let
       }];
   };
 in {
-  imports = [ <home-manager/nixos> ];
-
   config = {
     # Use the systemd-boot EFI boot loader.
     boot.loader.systemd-boot.enable = true;
