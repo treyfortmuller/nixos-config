@@ -1,16 +1,12 @@
 # Base configuration shared across all machines.
 
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, ... }:
 let
   system-font = "JetBrains Mono";
   i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
   nixpkgs-cfg-path = ./nixpkgs-config.nix;
 in
 {
-  imports = [
-    inputs.home-manager.nixosModules.home-manager
-  ];
-
   config = {
     # Use the systemd-boot EFI boot loader.
     boot.loader.systemd-boot.enable = true;

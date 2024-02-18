@@ -15,6 +15,7 @@
         system = "x86_64-linux";
         modules = [
           self.nixosModules.base
+          home-manager.nixosModules.home-manager
           ./kearsarge/configuration.nix
         ];
         specialArgs = { inherit inputs; };
@@ -24,6 +25,8 @@
     };
 
     nixosModules = {
+      # TODO (tff): somehow need to expose the home-manager modules through base or something
+
       # The base configuration to be dependended on private machines
       base = ./base.nix;
     };
