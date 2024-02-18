@@ -5,30 +5,6 @@ let
   system-font = "JetBrains Mono";
   i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
   nixpkgs-cfg-path = ./nixpkgs-config.nix;
-
-  # TODO (tff): manage with home-manager
-  vscode-and-friends = pkgs.vscode-with-extensions.override {
-    vscodeExtensions = with pkgs;
-      with vscode-extensions;
-      [
-        ms-vscode-remote.remote-ssh
-        ms-python.python
-        ms-vscode.cpptools
-        bbenoist.nix
-        eamodio.gitlens
-        zxh404.vscode-proto3
-        tamasfe.even-better-toml
-        matklad.rust-analyzer
-        arrterian.nix-env-selector
-        streetsidesoftware.code-spell-checker
-        ms-toolsai.jupyter
-      ] ++ vscode-utils.extensionsFromVscodeMarketplace [{
-        name = "cmake-tools";
-        publisher = "ms-vscode";
-        version = "1.12.27";
-        sha256 = "Q5QpVusHt0qgWwbn7Xrgk8hGh/plTx/Z4XwxISnm72s=";
-      }];
-  };
 in
 {
   imports = [
@@ -82,14 +58,15 @@ in
     #   keyMap = "us";
     # };
 
-    services.globalprotect.enable = true;
-
     # Enable the X11 windowing system.
     services.xserver = {
       enable = true;
 
       # Configure keymap in X11
       layout = "us";
+
+      # TODO: deliver this via home-manager to all systems
+      # This uses the file at ~/.background-image as the wallpaper.
       desktopManager.wallpaper.mode = "fill";
       displayManager.defaultSession = "none+i3";
 
@@ -144,6 +121,7 @@ in
           nixos-edit =
             "vim /home/trey/sources/nixos-config/base-configuration.nix";
           csv = "column -s, -t ";
+          jfu = "journalctl -fu";
         } // lib.optionalAttrs
           (builtins.elem pkgs.tty-clock config.environment.systemPackages)
           {
@@ -197,6 +175,42 @@ in
           pull.rebase = false;
           push.autoSetupRemote = true;
           init.defaultBranch = "master";
+        };
+      };
+
+      programs.vscode = {
+        enable = true;
+        enableExtensionUpdateCheck = false;
+        enableUpdateCheck = false;
+        extensions = with pkgs.vscode-extensions; [
+          ms-vscode-remote.remote-ssh
+          ms-python.python
+          ms-vscode.cpptools
+          bbenoist.nix
+          eamodio.gitlens
+          zxh404.vscode-proto3
+          tamasfe.even-better-toml
+          matklad.rust-analyzer
+          arrterian.nix-env-selector
+        ];
+        userSettings = {
+          "workbench.colorTheme" = "Default Dark+";
+          "explorer.confirmDelete" = false;
+          "explorer.confirmDragAndDrop" = false;
+
+          "editor.fontFamily" = "'JetBrains Mono Medium'";
+          "editor.fontLigatures" = true;
+          "editor.minimap.enabled" = true;
+
+          "[rust]"."editor.defaultFormatter" = "rust-lang.rust-analyzer";
+          "[rust]"."editor.formatOnSave" = true;
+          "rust-analyzer.cargo.features" = "all";
+
+          "[nix]"."editor.tabSize" = 2;
+
+          "cSpell.enableFiletypes" = [ "!proto3" ];
+          "window.zoomLevel" = 0;
+          "editor.rulers" = [ 120 ];
         };
       };
 
@@ -309,6 +323,13 @@ in
         '';
       };
 
+    # TODO (tff): figure out a good place to put this...
+    systemd.tmpfiles.rules = [
+      # This is where my screenshots go
+      "d /home/trey/screenshots - trey users - -"
+    ];
+
+
       services.picom = {
         enable = true;
         fade = false;
@@ -368,12 +389,14 @@ in
 
       # Thirdparty native
       zoom-us
-      chromium
+      
+      # TODO (tff): what should my strat be here?
+      # chromium
+      google-chrome
       spotify-tui
       slack
       qgroundcontrol
       signal-desktop
-      globalprotect-openconnect
 
       # Media
       vlc
@@ -393,7 +416,6 @@ in
       # Dev
       nixfmt
       nixpkgs-fmt
-      vscode-and-friends
       gh
       picocom
 

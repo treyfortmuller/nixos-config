@@ -10,21 +10,22 @@
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs: {
     nixosConfigurations = {
-      # TODO (tff): currently a placeholder
+      # Custom desktop build, NZXT case
       kearsarge = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          ./msi_trident/configuration.nix
+          self.nixosModules.base
+          ./kearsarge/configuration.nix
         ];
         specialArgs = { inherit inputs; };
       };
 
-      # TODO... more of them
+      # TODO... add the 2002 Nuc
     };
 
     nixosModules = {
       # The base configuration to be dependended on private machines
-      base = import ./base-configuration.nix;
+      base = ./base.nix;
     };
   };
 }
