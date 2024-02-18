@@ -99,6 +99,12 @@ in
       extraGroups = [ "wheel" "dialout" "audio" "docker" ];
     };
 
+    # # TODO (tff): figure out a good place to put this...
+    systemd.tmpfiles.rules = [
+      # This is where my screenshots go
+      "d /home/trey/screenshots - trey users - -"
+    ];
+
     # home-manager configuration
     home-manager.useGlobalPkgs = true;
     home-manager.users.trey = { pkgs, ... }: {
@@ -112,17 +118,15 @@ in
 
       programs.bash = {
         enable = true;
-        shellAliases = {
+        shellAliases = let
+          systemPackages = config.environment.systemPackages;
+        in {
           ll = "ls -l -h";
-          nixos-edit =
-            "vim /home/trey/sources/nixos-config/base-configuration.nix";
           csv = "column -s, -t ";
           jfu = "journalctl -fu";
-        } // lib.optionalAttrs
-          (builtins.elem pkgs.tty-clock config.environment.systemPackages)
-          {
-            clock = "tty-clock -btc";
-          };
+        } // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) {
+          clock = "tty-clock -btc";
+        };
       };
 
       programs.alacritty = {
@@ -318,13 +322,6 @@ in
           default_border pixel 3
         '';
       };
-
-    # TODO (tff): figure out a good place to put this...
-    systemd.tmpfiles.rules = [
-      # This is where my screenshots go
-      "d /home/trey/screenshots - trey users - -"
-    ];
-
 
       services.picom = {
         enable = true;

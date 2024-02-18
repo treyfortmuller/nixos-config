@@ -4,7 +4,7 @@
   inputs = {
     # NixOS official package source, using the nixos-22.11 branch here
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
-    home-manager.url = "github:nix-community/home-manager";
+    home-manager.url = "github:nix-community/home-manager?ref=release-22.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
@@ -15,7 +15,6 @@
         system = "x86_64-linux";
         modules = [
           self.nixosModules.base
-          home-manager.nixosModules.home-manager
           ./kearsarge/configuration.nix
         ];
         specialArgs = { inherit inputs; };
@@ -25,10 +24,13 @@
     };
 
     nixosModules = {
-      # TODO (tff): somehow need to expose the home-manager modules through base or something
-
       # The base configuration to be dependended on private machines
-      base = ./base.nix;
+      base = { ... }: {
+        imports = [
+          home-manager.nixosModules.home-manager
+          ./base.nix
+        ];
+      };
     };
   };
 }
