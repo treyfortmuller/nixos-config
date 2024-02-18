@@ -2,9 +2,9 @@
   description = "The missile knows where it is.";
 
   inputs = {
-    # NixOS official package source, using the nixos-22.11 branch here
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
-    home-manager.url = "github:nix-community/home-manager?ref=release-22.11";
+    # NixOS official package source, using the nixos-23.05 branch here
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
+    home-manager.url = "github:nix-community/home-manager?ref=release-23.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
