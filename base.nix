@@ -99,7 +99,7 @@ in
       extraGroups = [ "wheel" "dialout" "audio" "docker" ];
     };
 
-    # # TODO (tff): figure out a good place to put this...
+    # TODO (tff): figure out a good place to put this...
     systemd.tmpfiles.rules = [
       # This is where my screenshots go
       "d /home/trey/screenshots - trey users - -"
