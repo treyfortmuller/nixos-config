@@ -5,33 +5,8 @@ let
   system-font = "JetBrains Mono";
   i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
   nixpkgs-cfg-path = ./nixpkgs-config.nix;
-
-  # TODO (tff): manage with home-manager
-  vscode-and-friends = pkgs.vscode-with-extensions.override {
-    vscodeExtensions = with pkgs;
-      with vscode-extensions;
-      [
-        ms-vscode-remote.remote-ssh
-        ms-python.python
-        ms-vscode.cpptools
-        bbenoist.nix
-        eamodio.gitlens
-        zxh404.vscode-proto3
-        tamasfe.even-better-toml
-        matklad.rust-analyzer
-        arrterian.nix-env-selector
-        streetsidesoftware.code-spell-checker
-        ms-toolsai.jupyter
-      ] ++ vscode-utils.extensionsFromVscodeMarketplace [{
-        name = "cmake-tools";
-        publisher = "ms-vscode";
-        version = "1.12.27";
-        sha256 = "Q5QpVusHt0qgWwbn7Xrgk8hGh/plTx/Z4XwxISnm72s=";
-      }];
-  };
-in {
-  imports = [ <home-manager/nixos> ];
-
+in
+{
   config = {
     # Use the systemd-boot EFI boot loader.
     boot.loader.systemd-boot.enable = true;
@@ -79,14 +54,15 @@ in {
     #   keyMap = "us";
     # };
 
-    services.globalprotect.enable = true;
-
     # Enable the X11 windowing system.
     services.xserver = {
       enable = true;
 
       # Configure keymap in X11
       layout = "us";
+
+      # TODO: deliver this via home-manager to all systems
+      # This uses the file at ~/.background-image as the wallpaper.
       desktopManager.wallpaper.mode = "fill";
       displayManager.defaultSession = "none+i3";
 
@@ -123,6 +99,12 @@ in {
       extraGroups = [ "wheel" "dialout" "audio" "docker" ];
     };
 
+    # TODO (tff): figure out a good place to put this...
+    systemd.tmpfiles.rules = [
+      # This is where my screenshots go
+      "d /home/trey/screenshots - trey users - -"
+    ];
+
     # home-manager configuration
     home-manager.useGlobalPkgs = true;
     home-manager.users.trey = { pkgs, ... }: {
@@ -136,15 +118,15 @@ in {
 
       programs.bash = {
         enable = true;
-        shellAliases = {
+        shellAliases = let
+          systemPackages = config.environment.systemPackages;
+        in {
           ll = "ls -l -h";
-          nixos-edit =
-            "vim /home/trey/sources/nixos-config/base-configuration.nix";
           csv = "column -s, -t ";
-        } // lib.optionalAttrs
-          (builtins.elem pkgs.tty-clock config.environment.systemPackages) {
-            clock = "tty-clock -btc";
-          };
+          jfu = "journalctl -fu";
+        } // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) {
+          clock = "tty-clock -btc";
+        };
       };
 
       programs.alacritty = {
@@ -196,107 +178,145 @@ in {
         };
       };
 
+      programs.vscode = {
+        enable = true;
+        enableExtensionUpdateCheck = false;
+        enableUpdateCheck = false;
+        extensions = with pkgs.vscode-extensions; [
+          ms-vscode-remote.remote-ssh
+          ms-python.python
+          ms-vscode.cpptools
+          bbenoist.nix
+          eamodio.gitlens
+          zxh404.vscode-proto3
+          tamasfe.even-better-toml
+          matklad.rust-analyzer
+          arrterian.nix-env-selector
+        ];
+        userSettings = {
+          "workbench.colorTheme" = "Default Dark+";
+          "explorer.confirmDelete" = false;
+          "explorer.confirmDragAndDrop" = false;
+
+          "editor.fontFamily" = "'JetBrains Mono Medium'";
+          "editor.fontLigatures" = true;
+          "editor.minimap.enabled" = true;
+
+          "[rust]"."editor.defaultFormatter" = "rust-lang.rust-analyzer";
+          "[rust]"."editor.formatOnSave" = true;
+          "rust-analyzer.cargo.features" = "all";
+
+          "[nix]"."editor.tabSize" = 2;
+
+          "cSpell.enableFiletypes" = [ "!proto3" ];
+          "window.zoomLevel" = 0;
+          "editor.rulers" = [ 120 ];
+        };
+      };
+
       xsession.windowManager.i3 = {
         enable = true;
 
         # Gaps for the _asethetic_, note this override can be removed with the next
         # NixOS release. i3-gaps has since merged to mainline i3.
         package = pkgs.i3-gaps;
-        config = let
-          cfg = config.home-manager.users.trey.xsession.windowManager.i3.config;
-          mod = cfg.modifier;
-          menu = cfg.menu;
-        in {
-          modifier = "Mod4";
-          gaps.inner = 20;
-          terminal = "alacritty";
-          menu = "rofi -show drun";
-          fonts = {
-            names = [ system-font ];
-            style = "Regular";
-            size = 9.0;
+        config =
+          let
+            cfg = config.home-manager.users.trey.xsession.windowManager.i3.config;
+            mod = cfg.modifier;
+            menu = cfg.menu;
+          in
+          {
+            modifier = "Mod4";
+            gaps.inner = 20;
+            terminal = "alacritty";
+            menu = "rofi -show drun";
+            fonts = {
+              names = [ system-font ];
+              style = "Regular";
+              size = 9.0;
+            };
+            modes.resize = lib.mkOptionDefault {
+              # Return, Esc, or Mod+r again to escape resize mode
+              "Return" = "mode default";
+              "Escape" = "mode default";
+              "${mod}+r" = "mode default";
+
+              # Left to shrink, right to grow in width
+              # Up to shrink, down to grow in height
+              "Left" = "resize shrink width 75 px";
+              "Right" = "resize grow width 75 px";
+              "Down" = "resize grow height 75 px";
+              "Up" = "resize shrink height 75 px";
+            };
+
+            keybindings = lib.mkOptionDefault {
+              "${mod}+Escape" = "exec ${i3lock-wrap}/bin/i3lock-wrap";
+              "${mod}+Tab" = "exec rofi -show window";
+              "${mod}+s" = "exec rofi -show ssh";
+              "${mod}+d" = "focus mode_toggle";
+              "${mod}+space" = "exec" + " " + menu;
+              "${mod}+Shift+e" = ''
+                exec ${pkgs.i3-gaps}/bin/i3-nagbar -f 'pango:${system-font} 11' \
+                -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'
+              '';
+
+              # TODO (tff): Disable stacking and tabbed layouts
+              # "${mod}+w" = ""; <- remove this from the attrset defaults
+              "${mod}+Shift+f" = "floating toggle";
+              "${mod}+BackSpace" = "split toggle";
+
+              # TODO (tff): get the volume in the i3 status bar and refresh it
+              # Volume control
+              "XF86AudioRaiseVolume" =
+                "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
+              "XF86AudioLowerVolume" =
+                "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
+              "XF86AudioMute" =
+                "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
+              "XF86AudioMicMute" =
+                "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
+            };
+
+            colors = {
+              background = "#ffffff";
+              focused = {
+                border = "#49abf5";
+                background = "#285577";
+                text = "#ffffff";
+                indicator = "#9cccf0";
+                childBorder = "#49abf5";
+              };
+              focusedInactive = {
+                border = "#333333";
+                background = "#5f676a";
+                text = "#ffffff";
+                indicator = "#484e50";
+                childBorder = "#5f676a";
+              };
+              unfocused = {
+                border = "#333333";
+                background = "#222222";
+                text = "#888888";
+                indicator = "#292d2e";
+                childBorder = "#222222";
+              };
+              urgent = {
+                border = "#2f343a";
+                background = "#900000";
+                text = "#ffffff";
+                indicator = "#900000";
+                childBorder = "#900000";
+              };
+              placeholder = {
+                border = "#000000";
+                background = "#0c0c0c";
+                text = "#ffffff";
+                indicator = "#000000";
+                childBorder = "#0c0c0c";
+              };
+            };
           };
-          modes.resize = lib.mkOptionDefault {
-            # Return, Esc, or Mod+r again to escape resize mode
-            "Return" = "mode default";
-            "Escape" = "mode default";
-            "${mod}+r" = "mode default";
-
-            # Left to shrink, right to grow in width
-            # Up to shrink, down to grow in height
-            "Left" = "resize shrink width 75 px";
-            "Right" = "resize grow width 75 px";
-            "Down" = "resize grow height 75 px";
-            "Up" = "resize shrink height 75 px";
-          };
-
-          keybindings = lib.mkOptionDefault {
-            "${mod}+Escape" = "exec ${i3lock-wrap}/bin/i3lock-wrap";
-            "${mod}+Tab" = "exec rofi -show window";
-            "${mod}+s" = "exec rofi -show ssh";
-            "${mod}+d" = "focus mode_toggle";
-            "${mod}+space" = "exec" + " " + menu;
-            "${mod}+Shift+e" = ''
-              exec ${pkgs.i3-gaps}/bin/i3-nagbar -f 'pango:${system-font} 11' \
-              -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'
-            '';
-
-            # TODO (tff): Disable stacking and tabbed layouts
-            # "${mod}+w" = ""; <- remove this from the attrset defaults
-            "${mod}+Shift+f" = "floating toggle";
-            "${mod}+BackSpace" = "split toggle";
-
-            # TODO (tff): get the volume in the i3 status bar and refresh it
-            # Volume control
-            "XF86AudioRaiseVolume" =
-              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
-            "XF86AudioLowerVolume" =
-              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
-            "XF86AudioMute" =
-              "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
-            "XF86AudioMicMute" =
-              "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
-          };
-
-          colors = {
-            background = "#ffffff";
-            focused = {
-              border = "#49abf5";
-              background = "#285577";
-              text = "#ffffff";
-              indicator = "#9cccf0";
-              childBorder = "#49abf5";
-            };
-            focusedInactive = {
-              border = "#333333";
-              background = "#5f676a";
-              text = "#ffffff";
-              indicator = "#484e50";
-              childBorder = "#5f676a";
-            };
-            unfocused = {
-              border = "#333333";
-              background = "#222222";
-              text = "#888888";
-              indicator = "#292d2e";
-              childBorder = "#222222";
-            };
-            urgent = {
-              border = "#2f343a";
-              background = "#900000";
-              text = "#ffffff";
-              indicator = "#900000";
-              childBorder = "#900000";
-            };
-            placeholder = {
-              border = "#000000";
-              background = "#0c0c0c";
-              text = "#ffffff";
-              indicator = "#000000";
-              childBorder = "#0c0c0c";
-            };
-          };
-        };
         extraConfig = ''
           bindsym --release Print exec import ~/screenshots/$(date --iso-8601=seconds).png;
           default_border pixel 3
@@ -362,12 +382,14 @@ in {
 
       # Thirdparty native
       zoom-us
-      chromium
+      
+      # TODO (tff): what should my strat be here?
+      # chromium
+      google-chrome
       spotify-tui
       slack
       qgroundcontrol
       signal-desktop
-      globalprotect-openconnect
 
       # Media
       vlc
@@ -387,7 +409,6 @@ in {
       # Dev
       nixfmt
       nixpkgs-fmt
-      vscode-and-friends
       gh
       picocom
 

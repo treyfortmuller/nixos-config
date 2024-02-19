@@ -1,12 +1,14 @@
-# Home desktop overrides specific to that hardware.
+# Kearsarge desktop configuration
 
 # TODO (tff): none of this is setup yet, revisit!
 { config, pkgs, lib, ... }:
 let
 in {
-  imports = [ ../base-configuration.nix ./hardware-configuration.nix ];
+  imports = [ ./hardware-configuration.nix ];
 
   config = {
+    networking.hostName = "kearsarge";
+
     # This value determines the NixOS release from which the default
     # settings for stateful data, like file locations and database versions
     # on your system were taken. It‘s perfectly fine and recommended to leave
