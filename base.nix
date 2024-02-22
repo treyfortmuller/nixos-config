@@ -125,7 +125,7 @@ in
           csv = "column -s, -t ";
           jfu = "journalctl -fu";
           ip = "ip -c";
-          nixos-config = "~/sources/nixos-config";
+          nixos-config = "cd ~/sources/nixos-config";
         } // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) {
           clock = "tty-clock -btc";
         };
