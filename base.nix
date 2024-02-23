@@ -211,7 +211,7 @@ in
           "[nix]"."editor.tabSize" = 2;
 
           "cSpell.enableFiletypes" = [ "!proto3" ];
-          "window.zoomLevel" = 0;
+          "window.zoomLevel" = -1;
           "editor.rulers" = [ 120 ];
         };
       };
