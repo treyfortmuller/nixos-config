@@ -401,6 +401,9 @@ in
       meshlab
       ffmpeg-full
 
+      # PDF
+      evince
+
       # Some nonsense and shenanigans
       figlet
       cmatrix
