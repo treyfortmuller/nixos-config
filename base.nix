@@ -119,6 +119,7 @@ in
       # SSH configuration docs
       # https://linux.die.net/man/5/ssh_config
       programs.ssh = {
+        enable = true;
         extraConfig = ''
           ConnectTimeout=5
         '';
