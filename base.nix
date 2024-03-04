@@ -116,6 +116,14 @@ in
       nixpkgs.config = import nixpkgs-cfg-path;
       xdg.configFile."nixpkgs/config.nix".source = nixpkgs-cfg-path;
 
+      # SSH configuration docs
+      # https://linux.die.net/man/5/ssh_config
+      programs.ssh = {
+        extraConfig = ''
+          ConnectTimeout=5
+        '';
+      };
+
       programs.bash = {
         enable = true;
         shellAliases = let
