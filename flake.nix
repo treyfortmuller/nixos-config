@@ -21,6 +21,7 @@
       };
 
       # TODO... add the 2002 Nuc
+      # TODO... add the X1 Carbon laptop
     };
 
     nixosModules = {
