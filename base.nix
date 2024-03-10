@@ -61,8 +61,13 @@ in
       # Configure keymap in X11
       layout = "us";
 
-      # TODO: deliver this via home-manager to all systems
+      # TODO: deliver this to all systems
       # This uses the file at ~/.background-image as the wallpaper.
+      # 
+      # You can restart the display-manager with:
+      #   sudo systemctl restart display-manager
+      # 
+      # Note that will kill all graphical programs and log you out...
       desktopManager.wallpaper.mode = "fill";
       displayManager.defaultSession = "none+i3";
 
@@ -204,6 +209,7 @@ in
           tamasfe.even-better-toml
           matklad.rust-analyzer
           arrterian.nix-env-selector
+          streetsidesoftware.code-spell-checker
         ];
         userSettings = {
           "workbench.colorTheme" = "Default Dark+";
@@ -220,7 +226,10 @@ in
 
           "[nix]"."editor.tabSize" = 2;
 
-          "cSpell.enableFiletypes" = [ "!proto3" ];
+          "cSpell.enableFiletypes" = [
+            "nix"
+          ];
+
           "window.zoomLevel" = -1;
           "editor.rulers" = [ 120 ];
         };
