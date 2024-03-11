@@ -11,7 +11,6 @@ in
     services.wallsetter = {
       enable = true;
       user = "trey";
-      repo = outputs.packages.x86_64-linux.wallpapers;
       wallpaper = "monolith.jpg";
     };
 
