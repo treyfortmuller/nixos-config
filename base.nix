@@ -187,17 +187,13 @@ in
 
         aliases = {
           # List aliases
-          la = ''
-            git config --list | grep -E '^alias' | cut -c 7-
-          '';
+          la = "!git config --list | grep -E '^alias' | cut -c 7-";
 
           last = "log -1 HEAD";
           unstage = "reset HEAD --";
 
           # Beautiful one-liner log, last 20 commits
-          l = ''
-            log --pretty="%C(Yellow)%h  %C(reset)%ad (%C(Green)%cr%C(reset))%x09 %C(Cyan)%an %C(reset)%s" --date=short -20
-          '';
+          l = "log --pretty=\"%C(Yellow)%h  %C(reset)%ad (%C(Green)%cr%C(reset))%x09 %C(Cyan)%an %C(reset)%s\" --date=short -20";
 
           b = "branch --show";
           a = "add";
