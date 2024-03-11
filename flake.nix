@@ -8,10 +8,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs: 
-  let
-    inherit (self) outputs;
-  in {
+  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
     packages.x86_64-linux = let 
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
     in {
@@ -26,7 +23,7 @@
           self.nixosModules.base
           ./kearsarge/configuration.nix
         ];
-        specialArgs = { inherit inputs outputs; };
+        specialArgs = { inherit inputs; };
       };
 
       # TODO... add the 2002 Nuc
@@ -43,7 +40,14 @@
         ];
       };
 
-      wallsetter = import ./wallpapers/module.nix;
+      wallsetter = { ... }: {
+        imports = [
+          ./wallpapers/module.nix
+        ];
+        services.wallsetter.repo = self.packages.x86_64-linux.wallpapers;
+      };
     };
+
+    formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
   };
 }
