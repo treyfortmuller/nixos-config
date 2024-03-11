@@ -1,13 +1,20 @@
 # Base configuration shared across all machines.
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, outputs, ... }:
 let
   system-font = "JetBrains Mono";
   i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
   nixpkgs-cfg-path = ./nixpkgs-config.nix;
 in
 {
-  config = {
+  config = { 
+    services.wallsetter = {
+      enable = true;
+      user = "trey";
+      repo = outputs.packages.x86_64-linux.wallpapers;
+      wallpaper = "monolith.jpg";
+    };
+
     # Use the systemd-boot EFI boot loader.
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
@@ -61,13 +68,9 @@ in
       # Configure keymap in X11
       layout = "us";
 
-      # TODO: deliver this to all systems
-      # This uses the file at ~/.background-image as the wallpaper.
-      # 
-      # You can restart the display-manager with:
-      #   sudo systemctl restart display-manager
-      # 
-      # Note that will kill all graphical programs and log you out...
+      # By default, the desktop manager will look for a file called
+      # ~/.background-image as the wallpaper, but this doesn't have nice
+      # facilities for reloading at runtime so I made "wallsetter" for myself.
       desktopManager.wallpaper.mode = "fill";
       displayManager.defaultSession = "none+i3";
 
@@ -469,6 +472,9 @@ in
       nix-diff
       socat
       remmina
+      feh
+      git-lfs
+      setroot
     ];
 
     fonts.fonts = with pkgs; [ jetbrains-mono ];

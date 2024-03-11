@@ -70,3 +70,7 @@ Then in a new terminal we can open the spotify TUI
 spt
 # proceed to jam out
 ```
+
+### Other Resources
+
+* [nix-starter-configs](https://github.com/Misterio77/nix-starter-configs/tree/main) from Gabriel Fontes, well-documented and modern flake setup.

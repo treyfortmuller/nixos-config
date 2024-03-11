@@ -8,7 +8,16 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
+  outputs = { self, nixpkgs, home-manager, ... }@inputs: 
+  let
+    inherit (self) outputs;
+  in {
+    packages.x86_64-linux = let 
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+    in {
+      wallpapers = pkgs.callPackage ./wallpapers { };
+    };
+
     nixosConfigurations = {
       # Custom desktop build, NZXT case
       kearsarge = nixpkgs.lib.nixosSystem {
@@ -17,7 +26,7 @@
           self.nixosModules.base
           ./kearsarge/configuration.nix
         ];
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs outputs; };
       };
 
       # TODO... add the 2002 Nuc
@@ -25,13 +34,16 @@
     };
 
     nixosModules = {
-      # The base configuration to be dependended on private machines
+      # The base configuration to be depended on by privately-managed machines
       base = { ... }: {
         imports = [
           home-manager.nixosModules.home-manager
+          self.nixosModules.wallsetter
           ./base.nix
         ];
       };
+
+      wallsetter = import ./wallpapers/module.nix;
     };
   };
 }
