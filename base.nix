@@ -4,7 +4,6 @@
 let
   system-font = "JetBrains Mono";
   i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
-  nixpkgs-cfg-path = ./nixpkgs-config.nix;
 in
 {
   config = { 
@@ -117,11 +116,14 @@ in
     home-manager.users.trey = { pkgs, ... }: {
       home.stateVersion = config.system.stateVersion;
 
-      # The config.nixpkgs.config option allow applies to system instantiations
-      # via nixos-rebuild, this will allow us to install unfree packages via nix-shell, etc.
-      # It manages the ~/.config/nixpkgs/config.nix file.
-      nixpkgs.config = import nixpkgs-cfg-path;
-      xdg.configFile."nixpkgs/config.nix".source = nixpkgs-cfg-path;
+      # I seem to need both of these configs to allow unfree packages to be installed
+      # system-wide as well as via e.g. nix-shell invocations.
+      nixpkgs.config.allowUnfree = true;
+      
+      # Manage the ~/.config/nixpkgs/config.nix file.
+      xdg.configFile."nixpkgs/config.nix".text = ''
+        { allowUnfree = true; }
+      '';
 
       # SSH configuration docs
       # https://linux.die.net/man/5/ssh_config
@@ -155,7 +157,7 @@ in
           font.normal.family = system-font;
 
           # Alacritty can fade just its background rather than the text in the foreground
-          # which is preferrable, we'll apply focused/unfocused opacity control via picom.
+          # which is preferable, we'll apply focused/unfocused opacity control via picom.
           window.opacity = 0.9;
           window.padding = {
             # Pixel padding interior to the window
@@ -184,9 +186,10 @@ in
         ignores = [ "*~" "*.swp" ];
 
         aliases = {
+          # List aliases
+          la = "!git config -l | grep alias | cut -c 7-";
           last = "log -1 HEAD";
           unstage = "reset HEAD --";
-          la = "!git config -l | grep alias | cut -c 7-";
           # TODO (tff): get git recent in here
         };
 
