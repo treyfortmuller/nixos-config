@@ -1,6 +1,6 @@
 # nixos-config
 
-Drink this Kool-Aid, its delicious. These are the flake-based NixOS system configurations for all my machines. Downstream consumers at work, etc. can depend on this repo as a flake input by grabbing `nixosModules.base`.
+Drink this Kool-Aid, its delicious. These are the flake-based NixOS system configurations for all my machines. Downstream consumers at work, etc. can depend on this repo as a flake input by grabbing `nixosModules.base`. Here's some common nix CLI invocations for revving the config.
 
 Check that eval is gucci:
 
@@ -32,6 +32,24 @@ nix-repl> :lf .
 
 # Go nuts...
 nix-repl> nixosConfigurations.kearsarge.config
+```
+
+Build a system closure directly:
+
+```
+nix build .#nixosConfigurations.kearsarge.config.system.build.toplevel
+```
+
+Update a flake input:
+
+```
+nix flake update nixpkgs
+```
+
+Override a flake input with a local checkout:
+
+```
+nix flake lock --override-input nixpkgs ../nixpkgs
 ```
 
 ### New Machine Bringup
