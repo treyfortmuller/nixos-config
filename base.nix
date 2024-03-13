@@ -488,7 +488,12 @@ in
       remmina
       feh
       git-lfs
+
+      # TODO - this thing kinda sucks, replace with feh
       setroot
+
+      sshping
+      nethogs
     ];
 
     fonts.fonts = with pkgs; [ jetbrains-mono ];
