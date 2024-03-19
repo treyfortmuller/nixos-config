@@ -315,6 +315,10 @@ in
                 "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
               "XF86AudioMicMute" =
                 "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
+
+              # Brightness control for laptops
+              "XF86MonBrightnessDown" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%-";
+              "XF86MonBrightnessUp" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%+";
             };
 
             colors = {
@@ -491,6 +495,7 @@ in
       git-lfs
       sshping
       nethogs
+      brightnessctl
 
       # TODO - this thing kinda sucks, replace with feh
       setroot
