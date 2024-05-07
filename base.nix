@@ -411,6 +411,10 @@ in
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     environment.systemPackages = with pkgs; [
+      # Fixes some really bad issues with `nix copy` progress indication compared
+      # to nix CLI 2.13.
+      pkgs.unstable.nixVersions.nix_2_21
+
       _1password
 
       # Window manager and desktop enviornment
