@@ -4,11 +4,21 @@
   inputs = {
     # NixOS official package source, using the nixos-23.05 branch here
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
-    home-manager.url = "github:nix-community/home-manager?ref=release-23.05";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    home-manager = {
+      url = "github:nix-community/home-manager?ref=release-23.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nixpkgs-wayland = {
+      url = "github:nix-community/nixpkgs-wayland";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, nixpkgs-wayland, ... }@inputs: {
     packages.x86_64-linux = let 
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
     in {
@@ -20,7 +30,7 @@
       kearsarge = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          self.nixosModules.base
+          self.nixosModules.default
           ./kearsarge/configuration.nix
         ];
         specialArgs = { inherit inputs; };
@@ -32,11 +42,23 @@
 
     nixosModules = {
       # The base configuration to be depended on by privately-managed machines
-      base = { ... }: {
+      default = { ... }: {
         imports = [
           home-manager.nixosModules.home-manager
           self.nixosModules.wallsetter
           ./base.nix
+        ];
+
+        # final and prev, a.k.a. "self" and "super" respectively. This overlay
+        # makes 'pkgs.unstable' available.
+        nixpkgs.overlays = [ (final: prev: {
+            unstable = import nixpkgs-unstable {
+              system = final.system;
+              config.allowUnfree = true;
+            };
+          })
+
+          nixpkgs-wayland.overlay
         ];
       };
 
