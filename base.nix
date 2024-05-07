@@ -6,11 +6,21 @@ let
   i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
 in
 {
-  config = { 
+  config = {
     services.wallsetter = {
       enable = true;
       user = "trey";
       wallpaper = "monolith.jpg";
+    };
+
+    specialisation = {
+      # Docker tends to get in my way, leaving processes running and screwing with my
+      # iptables in ways that are hard to understand, so we'll just provide it as a specialisation
+      # to hop into when I need it.
+      docker.configuration = {
+        virtualisation.docker.enable = true;
+        users.users.trey.extraGroups = [ "docker" ];
+      };
     };
 
     # Use the systemd-boot EFI boot loader.
@@ -102,7 +112,9 @@ in
     # Define a user account. Don't forget to set a password with ‘passwd’.
     users.users.trey = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "dialout" "audio" "docker" ];
+      extraGroups = [ "wheel" "dialout" "audio" ]
+        ++ lib.optionals config.networking.networkmanager.enable
+        [ "networkmanager" ];
     };
 
     # TODO (tff): figure out a good place to put this...
@@ -119,7 +131,7 @@ in
       # I seem to need both of these configs to allow unfree packages to be installed
       # system-wide as well as via e.g. nix-shell invocations.
       nixpkgs.config.allowUnfree = true;
-      
+
       # Manage the ~/.config/nixpkgs/config.nix file.
       xdg.configFile."nixpkgs/config.nix".text = ''
         { allowUnfree = true; }
@@ -136,18 +148,20 @@ in
 
       programs.bash = {
         enable = true;
-        shellAliases = let
-          systemPackages = config.environment.systemPackages;
-        in {
-          ll = "ls -l -h";
-          csv = "column -s, -t ";
-          jfu = "journalctl -fu";
-          ip = "ip -c";
-          perms = "stat --format \"%a %n\"";
-          nixos-config = "cd ~/sources/nixos-config";
-        } // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) {
-          clock = "tty-clock -btc";
-        };
+        shellAliases =
+          let
+            systemPackages = config.environment.systemPackages;
+          in
+          {
+            ll = "ls -l -h";
+            csv = "column -s, -t ";
+            jfu = "journalctl -fu";
+            ip = "ip -c";
+            perms = "stat --format \"%a %n\"";
+            nixos-config = "cd ~/sources/nixos-config";
+          } // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) {
+            clock = "tty-clock -btc";
+          };
       };
 
       programs.alacritty = {
@@ -194,7 +208,7 @@ in
 
           # Most recently checked-out branches
           recent = "!git reflog show --pretty=format:'%gs ~ %gd' --date=relative | grep 'checkout:' | grep -oE '[^ ]+ ~ .*' | awk -F~ '!seen[$1]++' | head -n 10 | awk -F' ~ HEAD@{' '{printf(\"  \\033[33m%s: \\033[37m %s\\033[0m\\n\", substr($2, 1, length($2)-1), $1)}'";
-          
+
           last = "log -1 HEAD";
           unstage = "reset HEAD --";
           b = "branch --show";
@@ -405,9 +419,6 @@ in
       };
     };
 
-    # TODO (tff): get rid of docker if you dont need it...
-    virtualisation.docker.enable = true;
-
     # The head of home-manager master has a neovim.defaultEditor option
     # to accomplish this, but its not available in 22.11
     environment.sessionVariables = rec { EDITOR = "nvim"; };
@@ -429,7 +440,7 @@ in
 
       # Thirdparty native
       zoom-us
-      
+
       # TODO (tff): what should my strat be here?
       # chromium
       google-chrome
