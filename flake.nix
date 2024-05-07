@@ -30,7 +30,7 @@
       kearsarge = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          self.nixosModules.base
+          self.nixosModules.default
           ./kearsarge/configuration.nix
         ];
         specialArgs = { inherit inputs; };
@@ -42,7 +42,7 @@
 
     nixosModules = {
       # The base configuration to be depended on by privately-managed machines
-      base = { ... }: {
+      default = { ... }: {
         imports = [
           home-manager.nixosModules.home-manager
           self.nixosModules.wallsetter
