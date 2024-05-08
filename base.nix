@@ -172,7 +172,7 @@ in
             customprompt="\n''${greenboldnp}\t (''${blueboldnp}\W''${greenboldnp}) \$''${normalnp} "
           }
           prompt
-          export PS1=$customprompt
+          export PS1="$customprompt"
         '';
 
         initExtra = ''
