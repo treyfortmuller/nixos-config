@@ -467,7 +467,7 @@ in
     environment.systemPackages = with pkgs; [
       # Fixes some really bad issues with `nix copy` progress indication compared
       # to nix CLI 2.13.
-      pkgs.unstable.nixVersions.nix_2_21
+      pkgs.unstable.nixVersions.nix_2_19
 
       _1password
 
