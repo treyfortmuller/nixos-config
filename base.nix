@@ -164,6 +164,7 @@ in
           local greenboldnp="\[''${greenbold}\]"
         '';
       in {
+        enable = true;
         bashrcExtra = ''
           export NIX_PATH=nixpkgs=/home/trey/sources/anduril-nixpkgs:$NIX_PATH
 
