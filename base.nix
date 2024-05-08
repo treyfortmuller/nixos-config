@@ -146,22 +146,60 @@ in
         '';
       };
 
-      programs.bash = {
-        enable = true;
-        shellAliases =
-          let
-            systemPackages = config.environment.systemPackages;
-          in
-          {
-            ll = "ls -l -h";
-            csv = "column -s, -t ";
-            jfu = "journalctl -fu";
-            ip = "ip -c";
-            perms = "stat --format \"%a %n\"";
-            nixos-config = "cd ~/sources/nixos-config";
-          } // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) {
-            clock = "tty-clock -btc";
-          };
+      programs.bash = let
+        tput = "${pkgs.ncurses}/bin/tput";
+
+        # Common local variables for colorcoding the bash prompt and banner.
+        commonFormatting = ''
+          local normal=$(${tput} sgr0)
+          local bold=$(${tput} bold)
+          local blue=$(${tput} setaf 12)    #0000ff
+          local green=$(${tput} setaf 2)    #008000
+          local bluebold=''${blue}''${bold}
+          local greenbold=''${green}''${bold}
+
+          # Indicates non-printing characters for the bash prompt
+          local normalnp="\[''${normal}\]"
+          local blueboldnp="\[''${bluebold}\]"
+          local greenboldnp="\[''${greenbold}\]"
+        '';
+      in {
+        bashrcExtra = ''
+          export NIX_PATH=nixpkgs=/home/trey/sources/anduril-nixpkgs:$NIX_PATH
+
+          function prompt() {
+            ${commonFormatting}
+            customprompt="\n''${greenboldnp}\t (''${blueboldnp}\W''${greenboldnp}) \$''${normalnp} "
+          }
+          prompt
+          export PS1=$customprompt
+        '';
+
+        initExtra = ''
+          function banner() {
+              ${commonFormatting}
+              echo
+              echo "    ''${bluebold}$(whoami)''${normal}@''${bluebold}$(hostname)''${normal}"
+              echo
+              echo "    ''${bluebold}NixOS:''${normal} $(nixos-version)"
+              echo "    ''${bluebold}Date:''${normal} $(date --utc)"
+              echo
+          }
+
+          banner
+        '';
+
+        shellAliases = let systemPackages = config.environment.systemPackages;
+        in {
+          ll = "ls -l -h";
+          csv = "column -s, -t ";
+          jfu = "journalctl -fu";
+          ip = "ip -c";
+          perms = ''stat --format "%a %n"'';
+          nixos-config = "cd ~/sources/nixos-config";
+        } // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) {
+          clock = "tty-clock -btc";
+        };
       };
 
       programs.alacritty = {
