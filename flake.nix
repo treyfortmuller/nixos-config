@@ -46,7 +46,8 @@
         imports = [
           home-manager.nixosModules.home-manager
           self.nixosModules.wallsetter
-          ./base.nix
+          ./modules/base.nix
+          ./modules/laptops.nix
         ];
 
         # final and prev, a.k.a. "self" and "super" respectively. This overlay

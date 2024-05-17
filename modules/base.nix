@@ -436,7 +436,7 @@ in
         enable = true;
         terminal = "${pkgs.alacritty}/bin/alacritty";
         font = system-font + " " + builtins.toString 12;
-        theme = ./theme.rasi;
+        theme = ./config/theme.rasi;
 
         # TODO (tff): this doesn't seem to be working
         # plugins = with pkgs; [ rofi-power-menu ];
