@@ -54,7 +54,7 @@ in {
     programs.light.enable = true;
 
     # Turn off touchscreens should we have the misfortune of having one.
-    services.xserver.displayManager.sessionCommands = mkIf cfg.touchScreenDeviceId != null ''
+    services.xserver.displayManager.sessionCommands = mkIf (cfg.touchScreenDeviceId != null) ''
       deviceId=$(${pkgs.xorg.xinput}/bin/xinput list | grep ${cfg.touchScreenDeviceId} | cut -f2 | cut -d= -f2);
       ${pkgs.xorg.xinput}/bin/xinput disable $deviceId;
     '';
