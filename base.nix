@@ -512,6 +512,10 @@ in
       gh
       picocom
 
+      # Yubikey management
+      yubikey-manager
+      yubikey-manager-qt
+
       # Tools
       wget
       ack
@@ -535,6 +539,7 @@ in
       cntr
       ripgrep
       lsof
+      lshw
       unzip
       tcpdump
       arp-scan
