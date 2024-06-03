@@ -465,9 +465,12 @@ in
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     environment.systemPackages = with pkgs; [
+      unstable.nix-search-cli
+      okular
+
       # Fixes some really bad issues with `nix copy` progress indication compared
       # to nix CLI 2.13.
-      pkgs.unstable.nixVersions.nix_2_19
+      unstable.nixVersions.nix_2_19
 
       _1password
 
@@ -478,7 +481,7 @@ in
       i3lock-wrap
 
       # Thirdparty native
-      zoom-us
+      unstable.zoom-us
 
       # TODO (tff): what should my strat be here?
       # chromium
