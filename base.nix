@@ -198,6 +198,7 @@ in
           ip = "ip -c";
           perms = ''stat --format "%a %n"'';
           nixos-config = "cd ~/sources/nixos-config";
+          diff = "diff -y --color";
         } // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) {
           clock = "tty-clock -btc";
         };
