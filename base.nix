@@ -203,6 +203,17 @@ in
         };
       };
 
+      programs.fzf = {
+        enable = true;
+        enableBashIntegration = true;
+
+        # Can go crazy with this later...
+        # colors = { };
+
+        # Haven't experimented with this yet, uses fxf-tmux
+        # tmux.enableShellIntegration
+      };
+
       programs.alacritty = {
         enable = true;
         settings = {
@@ -466,7 +477,6 @@ in
     # $ nix search wget
     environment.systemPackages = with pkgs; [
       unstable.nix-search-cli
-      okular
 
       # Fixes some really bad issues with `nix copy` progress indication compared
       # to nix CLI 2.13.
@@ -501,6 +511,7 @@ in
 
       # PDF
       evince
+      okular
 
       # Some nonsense and shenanigans
       figlet
