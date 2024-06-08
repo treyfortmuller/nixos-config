@@ -7,8 +7,10 @@ let
 in
 {
   config = {
+
+    # TODO: do something different for wayland.
     services.wallsetter = {
-      enable = true;
+      enable = false;
       user = "trey";
       wallpaper = "monolith.jpg";
     };
@@ -69,30 +71,39 @@ in
     #   keyMap = "us";
     # };
 
-    # Enable the X11 windowing system.
-    services.xserver = {
-      enable = true;
+    # # Swapping to sway - TODO: through home-manager
+    # programs.sway = {
+    #   enable = true;
+    #   wrapperFeatures.gtk = true;
+    # };
+    
+    # Wayland requires policykit and OpenGL
+    security.polkit.enable = true;
+    hardware.opengl.enable = true;
 
-      # Configure keymap in X11
-      layout = "us";
+    # # Enable the X11 windowing system.
+    # services.xserver = {
+    #   enable = true;
 
-      # By default, the desktop manager will look for a file called
-      # ~/.background-image as the wallpaper, but this doesn't have nice
-      # facilities for reloading at runtime so I made "wallsetter" for myself.
-      desktopManager.wallpaper.mode = "fill";
-      displayManager.defaultSession = "none+i3";
+    #   # Configure keymap in X11
+    #   layout = "us";
 
-      # Seems like this is necessary to keep around despite all the config
-      # being applied by home-manager.
-      windowManager.i3 = {
-        enable = true;
-        package = pkgs.i3-gaps;
-      };
-    };
+    #   # By default, the desktop manager will look for a file called
+    #   # ~/.background-image as the wallpaper, but this doesn't have nice
+    #   # facilities for reloading at runtime so I made "wallsetter" for myself.
+    #   desktopManager.wallpaper.mode = "fill";
+    #   displayManager.defaultSession = "none+i3";
+
+    #   # Seems like this is necessary to keep around despite all the config
+    #   # being applied by home-manager.
+    #   windowManager.i3 = {
+    #     enable = true;
+    #     package = pkgs.i3-gaps;
+    #   };
+    # };
 
     # Nvidia GPU go brrrrrr
     # services.xserver.videoDrivers = [ "nvidia" ];
-    # hardware.opengl.enable = true;
     # hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
 
     # services.xserver.xkbOptions = "eurosign:e";
@@ -318,145 +329,193 @@ in
         };
       };
 
-      xsession.windowManager.i3 = {
+      wayland.windowManager.sway = {
         enable = true;
+        config = let
+          mod = "Mod4";
+        in {
+          modifier = mod;
+          terminal = "alacritty";
+          # TODO: need an output
+          # output = { };
 
-        # Gaps for the _asethetic_, note this override can be removed with the next
-        # NixOS release. i3-gaps has since merged to mainline i3.
-        package = pkgs.i3-gaps;
-        config =
-          let
-            cfg = config.home-manager.users.trey.xsession.windowManager.i3.config;
-            mod = cfg.modifier;
-            menu = cfg.menu;
-          in
-          {
-            modifier = "Mod4";
-            gaps.inner = 20;
-            terminal = "alacritty";
-            menu = "rofi -show drun";
-            fonts = {
-              names = [ system-font ];
-              style = "Regular";
-              size = 9.0;
+          gaps.inner = 20;
+
+          # TODO: need something other than rofi
+          # menu = "rofi -show drun";
+          # fonts = {
+          #   names = [ system-font ];
+          #   style = "Regular";
+          #   size = 9.0;
+          # };
+
+          modes.resize = lib.mkOptionDefault {
+            # Return, Esc, or Mod+r again to escape resize mode
+            "Return" = "mode default";
+            "Escape" = "mode default";
+            "${mod}+r" = "mode default";
+
+            # Left to shrink, right to grow in width
+            # Up to shrink, down to grow in height
+            "Left" = "resize shrink width 75 px";
+            "Right" = "resize grow width 75 px";
+            "Down" = "resize grow height 75 px";
+            "Up" = "resize shrink height 75 px";
+          };
+
+          keybindings = lib.mkOptionDefault {
+            "${mod}+Escape" = "exec ${i3lock-wrap}/bin/i3lock-wrap";
+            "${mod}+Tab" = "exec rofi -show window";
+            "${mod}+s" = "exec rofi -show ssh";
+            "${mod}+d" = "focus mode_toggle";
+
+            # TODO: come back to this
+            # "${mod}+space" = "exec" + " " + menu;
+            "${mod}+Shift+e" = ''
+              exec ${pkgs.i3-gaps}/bin/i3-nagbar -f 'pango:${system-font} 11' \
+              -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'
+            '';
+
+            # TODO (tff): Disable stacking and tabbed layouts
+            # "${mod}+w" = ""; <- remove this from the attrset defaults
+            "${mod}+Shift+f" = "floating toggle";
+            "${mod}+BackSpace" = "split toggle";
+
+            # TODO (tff): get the volume in the i3 status bar and refresh it
+            # Volume control
+            "XF86AudioRaiseVolume" =
+              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
+            "XF86AudioLowerVolume" =
+              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
+            "XF86AudioMute" =
+              "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
+            "XF86AudioMicMute" =
+              "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
+
+            # Brightness control for laptops
+            "XF86MonBrightnessDown" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%-";
+            "XF86MonBrightnessUp" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%+";
+          };
+
+          colors = {
+            background = "#ffffff";
+            focused = {
+              border = "#49abf5";
+              background = "#285577";
+              text = "#ffffff";
+              indicator = "#9cccf0";
+              childBorder = "#49abf5";
             };
-            modes.resize = lib.mkOptionDefault {
-              # Return, Esc, or Mod+r again to escape resize mode
-              "Return" = "mode default";
-              "Escape" = "mode default";
-              "${mod}+r" = "mode default";
-
-              # Left to shrink, right to grow in width
-              # Up to shrink, down to grow in height
-              "Left" = "resize shrink width 75 px";
-              "Right" = "resize grow width 75 px";
-              "Down" = "resize grow height 75 px";
-              "Up" = "resize shrink height 75 px";
+            focusedInactive = {
+              border = "#333333";
+              background = "#5f676a";
+              text = "#ffffff";
+              indicator = "#484e50";
+              childBorder = "#5f676a";
             };
-
-            keybindings = lib.mkOptionDefault {
-              "${mod}+Escape" = "exec ${i3lock-wrap}/bin/i3lock-wrap";
-              "${mod}+Tab" = "exec rofi -show window";
-              "${mod}+s" = "exec rofi -show ssh";
-              "${mod}+d" = "focus mode_toggle";
-              "${mod}+space" = "exec" + " " + menu;
-              "${mod}+Shift+e" = ''
-                exec ${pkgs.i3-gaps}/bin/i3-nagbar -f 'pango:${system-font} 11' \
-                -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'
-              '';
-
-              # TODO (tff): Disable stacking and tabbed layouts
-              # "${mod}+w" = ""; <- remove this from the attrset defaults
-              "${mod}+Shift+f" = "floating toggle";
-              "${mod}+BackSpace" = "split toggle";
-
-              # TODO (tff): get the volume in the i3 status bar and refresh it
-              # Volume control
-              "XF86AudioRaiseVolume" =
-                "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
-              "XF86AudioLowerVolume" =
-                "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
-              "XF86AudioMute" =
-                "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
-              "XF86AudioMicMute" =
-                "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
-
-              # Brightness control for laptops
-              "XF86MonBrightnessDown" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%-";
-              "XF86MonBrightnessUp" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%+";
+            unfocused = {
+              border = "#333333";
+              background = "#222222";
+              text = "#888888";
+              indicator = "#292d2e";
+              childBorder = "#222222";
             };
-
-            colors = {
-              background = "#ffffff";
-              focused = {
-                border = "#49abf5";
-                background = "#285577";
-                text = "#ffffff";
-                indicator = "#9cccf0";
-                childBorder = "#49abf5";
-              };
-              focusedInactive = {
-                border = "#333333";
-                background = "#5f676a";
-                text = "#ffffff";
-                indicator = "#484e50";
-                childBorder = "#5f676a";
-              };
-              unfocused = {
-                border = "#333333";
-                background = "#222222";
-                text = "#888888";
-                indicator = "#292d2e";
-                childBorder = "#222222";
-              };
-              urgent = {
-                border = "#2f343a";
-                background = "#900000";
-                text = "#ffffff";
-                indicator = "#900000";
-                childBorder = "#900000";
-              };
-              placeholder = {
-                border = "#000000";
-                background = "#0c0c0c";
-                text = "#ffffff";
-                indicator = "#000000";
-                childBorder = "#0c0c0c";
-              };
+            urgent = {
+              border = "#2f343a";
+              background = "#900000";
+              text = "#ffffff";
+              indicator = "#900000";
+              childBorder = "#900000";
+            };
+            placeholder = {
+              border = "#000000";
+              background = "#0c0c0c";
+              text = "#ffffff";
+              indicator = "#000000";
+              childBorder = "#0c0c0c";
             };
           };
-        extraConfig = ''
-          bindsym --release Print exec import ~/screenshots/$(date --iso-8601=seconds).png;
-          default_border pixel 3
-        '';
-      };
-
-      services.picom = {
-        enable = true;
-        fade = false;
-        activeOpacity = 1.0;
-        inactiveOpacity = 1.0;
-
-        # Only applying opacity rules to terminal windows
-        opacityRules = [
-          "100:class_g = 'Alacritty' && focused"
-          "90:class_g = 'Alacritty' && !focused"
-        ];
-      };
-
-      programs.rofi = {
-        enable = true;
-        terminal = "${pkgs.alacritty}/bin/alacritty";
-        font = system-font + " " + builtins.toString 12;
-        theme = ./theme.rasi;
-
-        # TODO (tff): this doesn't seem to be working
-        # plugins = with pkgs; [ rofi-power-menu ];
-        extraConfig = {
-          display-drun = "Applications";
-          display-window = "Windows";
         };
+        
+      #   # TODO: doubt this is working...
+      #   # extraConfig = ''
+      #   #   bindsym --release Print exec import ~/screenshots/$(date --iso-8601=seconds).png;
+      #   #   default_border pixel 3
+      #   # '';
+
+      #   # Can mess around with this later...
+      #   # startup = [
+      #   #   # Launch Firefox on start
+      #   #   {command = "firefox";}
+      #   # ];
       };
+
+      # # xsession.windowManager.i3 = {
+      # #   enable = true;
+
+      # #   # Gaps for the _asethetic_, note this override can be removed with the next
+      # #   # NixOS release. i3-gaps has since merged to mainline i3.
+      # #   package = pkgs.i3-gaps;
+      # #   config =
+      # #     let
+      # #       cfg = config.home-manager.users.trey.xsession.windowManager.i3.config;
+      # #       mod = cfg.modifier;
+      # #       menu = cfg.menu;
+      # #     in
+      # #     {
+      # #       modifier = "Mod4";
+      # #       gaps.inner = 20;
+      # #       terminal = "alacritty";
+      # #       menu = "rofi -show drun";
+      # #       fonts = {
+      # #         names = [ system-font ];
+      # #         style = "Regular";
+      # #         size = 9.0;
+      # #       };
+      # #       modes.resize = lib.mkOptionDefault {
+      # #         # Return, Esc, or Mod+r again to escape resize mode
+      # #         "Return" = "mode default";
+      # #         "Escape" = "mode default";
+      # #         "${mod}+r" = "mode default";
+
+      # #         # Left to shrink, right to grow in width
+      # #         # Up to shrink, down to grow in height
+      # #         "Left" = "resize shrink width 75 px";
+      # #         "Right" = "resize grow width 75 px";
+      # #         "Down" = "resize grow height 75 px";
+      # #         "Up" = "resize shrink height 75 px";
+      # #       };
+
+      #     # };
+
+      # };
+
+      # services.picom = {
+      #   enable = true;
+      #   fade = false;
+      #   activeOpacity = 1.0;
+      #   inactiveOpacity = 1.0;
+
+      #   # Only applying opacity rules to terminal windows
+      #   opacityRules = [
+      #     "100:class_g = 'Alacritty' && focused"
+      #     "90:class_g = 'Alacritty' && !focused"
+      #   ];
+      # };
+
+      # programs.rofi = {
+      #   enable = true;
+      #   terminal = "${pkgs.alacritty}/bin/alacritty";
+      #   font = system-font + " " + builtins.toString 12;
+      #   theme = ./theme.rasi;
+
+      #   # TODO (tff): this doesn't seem to be working
+      #   # plugins = with pkgs; [ rofi-power-menu ];
+      #   extraConfig = {
+      #     display-drun = "Applications";
+      #     display-window = "Windows";
+      #   };
+      # };
 
       services.spotifyd = {
         enable = true;
@@ -485,11 +544,12 @@ in
 
       _1password
 
+      # TODO: axe these.
       # Window manager and desktop enviornment
-      rofi
-      i3status
-      i3lock-color
-      i3lock-wrap
+      # rofi
+      # i3status
+      # i3lock-color
+      # i3lock-wrap
 
       # Thirdparty native
       unstable.zoom-us
@@ -575,7 +635,7 @@ in
       setroot
     ];
 
-    fonts.fonts = with pkgs; [ jetbrains-mono ];
+    fonts.packages = with pkgs; [ jetbrains-mono ];
 
     # TODO (tff): I need to be using home manager to manage my VScode user settings:
     # https://github.com/nix-community/home-manager/blob/master/modules/programs/vscode.nix

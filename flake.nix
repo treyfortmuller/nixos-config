@@ -2,13 +2,13 @@
   description = "The missile knows where it is.";
 
   inputs = {
-    # NixOS official package source, using the nixos-23.05 branch here
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
+    # NixOS official package source, using the nixos-23.11 branch here
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
 
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     home-manager = {
-      url = "github:nix-community/home-manager?ref=release-23.05";
+      url = "github:nix-community/home-manager?ref=release-23.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -58,7 +58,8 @@
             };
           })
 
-          nixpkgs-wayland.overlay
+          # TODO: anything good in here?
+          # nixpkgs-wayland.overlay
         ];
       };
 
