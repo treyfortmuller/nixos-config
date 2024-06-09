@@ -10,7 +10,9 @@ let
 
   # Preferred datetime format, used throughout the system
   # Sunday June 09 00:58:05 (BST) 2024
-  preferredStrftime = "%A %B %d %H:%M:%S (%Z) %Y";
+  preferredTimeStr = "%H:%M:%S";
+  preferredDateStr = "%A %B %d";
+  preferredStrftime = "${preferredDateStr} ${preferredTimeStr} (%Z) %Y";
 in
 {
   config = {
@@ -59,6 +61,10 @@ in
     security.sudo.extraConfig = ''
       Defaults        timestamp_timeout=10
     '';
+
+    # Note that PAM must be configured to enable swaylock to perform authentication.
+    # The package installed through home-manager will not be able to unlock the session without this configuration.
+    security.pam.services.swaylock = { };
 
     # The global useDHCP flag is deprecated, therefore explicitly set to false here.
     # Per-interface useDHCP will be mandatory in the future, so this generated config
@@ -229,7 +235,7 @@ in
               echo "    ''${bluebold}$(whoami)''${normal}@''${bluebold}$(hostname)''${normal}"
               echo
               echo "    ''${bluebold}NixOS:''${normal} $(nixos-version)"
-              echo "    ''${bluebold}Date:''${normal} $(date --utc)"
+              echo "    ''${bluebold}Date:''${normal} $(date +"${preferredStrftime}")"
               echo
           }
 
@@ -413,7 +419,7 @@ in
           };
 
           keybindings = lib.mkOptionDefault {
-            "${mod}+Escape" = "exec ${i3lock-wrap}/bin/i3lock-wrap";
+            "${mod}+Escape" = "exec ${pkgs.swaylock-effects}/bin/swaylock";
             "${mod}+Tab" = "exec rofi -show window";
             "${mod}+s" = "exec rofi -show ssh";
             "${mod}+d" = "focus mode_toggle";
@@ -656,58 +662,27 @@ in
         };
       };
 
-      # # xsession.windowManager.i3 = {
-      # #   enable = true;
-
-      # #   # Gaps for the _asethetic_ note this override can be removed with the next
-      # #   # NixOS release. i3-gaps has since merged to mainline i3.
-      # #   package = pkgs.i3-gaps;
-      # #   config =
-      # #     let
-      # #       cfg = config.home-manager.users.trey.xsession.windowManager.i3.config;
-      # #       mod = cfg.modifier;
-      # #       menu = cfg.menu;
-      # #     in
-      # #     {
-      # #       modifier = "Mod4";
-      # #       gaps.inner = 20;
-      # #       terminal = "alacritty";
-      # #       menu = "rofi -show drun";
-      # #       fonts = {
-      # #         names = [ systemFont ];
-      # #         style = "Regular";
-      # #         size = 9.0;
-      # #       };
-      # #       modes.resize = lib.mkOptionDefault {
-      # #         # Return, Esc, or Mod+r again to escape resize mode
-      # #         "Return" = "mode default";
-      # #         "Escape" = "mode default";
-      # #         "${mod}+r" = "mode default";
-
-      # #         # Left to shrink, right to grow in width
-      # #         # Up to shrink, down to grow in height
-      # #         "Left" = "resize shrink width 75 px";
-      # #         "Right" = "resize grow width 75 px";
-      # #         "Down" = "resize grow height 75 px";
-      # #         "Up" = "resize shrink height 75 px";
-      # #       };
-
-      #     # };
-
-      # };
-
-      # services.picom = {
-      #   enable = true;
-      #   fade = false;
-      #   activeOpacity = 1.0;
-      #   inactiveOpacity = 1.0;
-
-      #   # Only applying opacity rules to terminal windows
-      #   opacityRules = [
-      #     "100:class_g = 'Alacritty' && focused"
-      #     "90:class_g = 'Alacritty' && !focused"
-      #   ];
-      # };
+      # Swaylock doesn't have all the features of i3lock-colors, so this is kind of a joke.
+      programs.swaylock = {
+        enable = true;
+        package = pkgs.swaylock-effects;
+        settings = {
+          color = "000000ff";                        
+          ignore-empty-password = true;
+          font="${systemFont}";
+          clock = true;
+          timestr="${preferredTimeStr}";
+          datestr="${preferredDateStr}";
+          screenshots = false;
+          indicator = true;
+          inside-color = "000000ff";
+          inside-clear-color = "000000ff";
+          inside-caps-lock-color = "000000ff";
+          text-color = "ffffffff";
+          text-clear-color = "ffffffff";
+          text-caps-lock-color = "ffffffff";
+        };
+      };
 
       # programs.rofi = {
       #   enable = true;
