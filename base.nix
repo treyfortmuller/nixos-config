@@ -13,14 +13,6 @@ let
 in
 {
   config = {
-
-    # TODO: do something different for wayland.
-    # services.wallsetter = {
-    #   enable = false;
-    #   user = "trey";
-    #   wallpaper = "monolith.jpg";
-    # };
-
     specialisation = {
       # Docker tends to get in my way, leaving processes running and screwing with my
       # iptables in ways that are hard to understand, so we'll just provide it as a specialisation
@@ -94,8 +86,6 @@ in
     # Nvidia GPU go brrrrrr
     # services.xserver.videoDrivers = [ "nvidia" ];
     # hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
-
-    # services.xserver.xkbOptions = "eurosign:e";
 
     # Enable CUPS to print documents.
     services.printing.enable = true;
@@ -480,8 +470,6 @@ in
           terminal = "${pkgs.alacritty}/bin/alacritty";
           font = systemFont + " " + builtins.toString 12;
           theme = ./rofi.rasi;
-          # TODO (tff): this doesn't seem to be working
-          # plugins = with pkgs; [ rofi-power-menu ];
           extraConfig = {
             display-drun = "Applications";
             display-window = "Windows";
@@ -797,10 +785,8 @@ in
       wlogout
     ];
 
+    # TODO: find of bored of jetbrains-mono, need something new
     fonts.packages = with pkgs; [ jetbrains-mono ];
-
-    # TODO (tff): I need to be using home manager to manage my VScode user settings:
-    # https://github.com/nix-community/home-manager/blob/master/modules/programs/vscode.nix
 
     # Some programs need SUID wrappers, can be configured further or are
     # started in user sessions.

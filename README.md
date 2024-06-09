@@ -86,3 +86,8 @@ spt
 
 * [nix-starter-configs](https://github.com/Misterio77/nix-starter-configs/tree/main) from Gabriel Fontes, well-documented and modern flake setup.
 * [jringer's config](https://github.com/jonringer/nixpkgs-config/tree/master) because Jon knows what he is talking about.
+
+### TODO
+
+* more fzf customization, bat previews, vim-plugins, etc.
+* Some basic CI for the repo with `nix flake check .#`
