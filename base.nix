@@ -5,9 +5,6 @@ let
   systemFont = "JetBrains Mono";
   systemFontBold = "JetBrains Mono SemiBold";
 
-  # TODO:
-  i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
-
   # Preferred datetime format, used throughout the system
   # Sunday June 09 00:58:05 (BST) 2024
   preferredTimeStr = "%H:%M:%S";
@@ -93,28 +90,6 @@ in
     # Wayland requires policykit and OpenGL
     security.polkit.enable = true;
     hardware.opengl.enable = true;
-
-
-    # # Enable the X11 windowing system.
-    # services.xserver = {
-    #   enable = true;
-
-    #   # Configure keymap in X11
-    #   layout = "us";
-
-    #   # By default, the desktop manager will look for a file called
-    #   # ~/.background-image as the wallpaper, but this doesn't have nice
-    #   # facilities for reloading at runtime so I made "wallsetter" for myself.
-    #   desktopManager.wallpaper.mode = "fill";
-    #   displayManager.defaultSession = "none+i3";
-
-    #   # Seems like this is necessary to keep around despite all the config
-    #   # being applied by home-manager.
-    #   windowManager.i3 = {
-    #     enable = true;
-    #     package = pkgs.i3-gaps;
-    #   };
-    # };
 
     # Nvidia GPU go brrrrrr
     # services.xserver.videoDrivers = [ "nvidia" ];
@@ -426,14 +401,8 @@ in
 
                 # Sway defaults differ from i3 a tiny bit here
                 "${mod}+Shift+r" = "reload";
-
                 "${mod}+space" = "exec rofi -show drun";
-                
-                # TODO: come back to this, there's a fancy logout prompt thing for wayland
-                "${mod}+Shift+e" = ''
-                  exec ${pkgs.i3-gaps}/bin/i3-nagbar -f 'pango:${systemFont} 11' \
-                  -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'
-                '';
+                "${mod}+Shift+e" = "exec ${pkgs.wlogout}/bin/wlogout";
 
                 # Screenshots via grimshot, save to screenshots dir
                 "Print" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area ~/screenshots/$(date --iso-8601=seconds).png";
@@ -448,7 +417,7 @@ in
                 "${mod}+Shift+f" = "floating toggle";
                 "${mod}+BackSpace" = "split toggle";
 
-                # TODO (tff): get the volume in the i3 status bar and refresh it
+                # TODO (tff): get the volume in waybar!
                 # Volume control
                 "XF86AudioRaiseVolume" =
                   "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
@@ -689,6 +658,30 @@ in
           };
         };
 
+        # https://github.com/ArtsyMacaw/wlogout#config
+        programs.wlogout = {
+          enable = true;
+
+          # For future ricing...
+          # style = builtins.readFile ./some-path.css;
+        };
+
+        services.gammastep = {
+          enable = true;
+          provider = "manual";
+
+          # Could hook this up with a top-level mapping including the timezone.
+          latitude = 51.501083;
+          longitude = -0.142352;
+          temperature = {
+            day = 6500;
+            night = 3700;
+          };
+
+          # TODO: get this working with waybar.
+          tray = true;
+        };
+
         services.spotifyd = {
           enable = true;
           settings = {
@@ -801,6 +794,7 @@ in
       sshping
       nethogs
       brightnessctl
+      wlogout
     ];
 
     fonts.packages = with pkgs; [ jetbrains-mono ];

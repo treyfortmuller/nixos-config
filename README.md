@@ -56,13 +56,6 @@ nix flake lock --override-input nixpkgs ../nixpkgs
 
 TODO
 
-### TODO
-
-- [ ] `home-manager`'s `services.screen-locker` seems useful for autolocking
-- [ ] setup some nix eval CI for this repo
-- [ ] rofi power menu setup
-- [ ] polybar/i3bar configuration
-
 ---
 
 Notes on `spotifyd` and `spt`
