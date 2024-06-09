@@ -19,11 +19,11 @@
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, nixpkgs-wayland, ... }@inputs: {
-    packages.x86_64-linux = let 
-      pkgs = nixpkgs.legacyPackages.x86_64-linux;
-    in {
-      wallpapers = pkgs.callPackage ./wallpapers { };
-    };
+    # packages.x86_64-linux = let 
+      # pkgs = nixpkgs.legacyPackages.x86_64-linux;
+    # in {
+      # wallpapers = pkgs.callPackage ./wallpapers { };
+    # };
 
     nixosConfigurations = {
       # Custom desktop build, NZXT case
@@ -45,7 +45,7 @@
       default = { ... }: {
         imports = [
           home-manager.nixosModules.home-manager
-          self.nixosModules.wallsetter
+          # self.nixosModules.wallsetter
           ./base.nix
         ];
 
@@ -63,12 +63,12 @@
         ];
       };
 
-      wallsetter = { ... }: {
-        imports = [
-          ./wallpapers/module.nix
-        ];
-        services.wallsetter.repo = self.packages.x86_64-linux.wallpapers;
-      };
+      # wallsetter = { ... }: {
+      #   imports = [
+      #     ./wallpapers/module.nix
+      #   ];
+      #   services.wallsetter.repo = self.packages.x86_64-linux.wallpapers;
+      # };
     };
 
     formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;

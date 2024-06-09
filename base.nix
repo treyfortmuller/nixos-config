@@ -2,18 +2,21 @@
 
 { config, pkgs, lib, inputs, outputs, ... }:
 let
-  system-font = "JetBrains Mono";
+  systemFont = "JetBrains Mono";
+  systemFontBold = "JetBrains Mono SemiBold";
+
+  # TODO:
   i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
 in
 {
   config = {
 
     # TODO: do something different for wayland.
-    services.wallsetter = {
-      enable = false;
-      user = "trey";
-      wallpaper = "monolith.jpg";
-    };
+    # services.wallsetter = {
+    #   enable = false;
+    #   user = "trey";
+    #   wallpaper = "monolith.jpg";
+    # };
 
     specialisation = {
       # Docker tends to get in my way, leaving processes running and screwing with my
@@ -136,8 +139,16 @@ in
 
     # home-manager configuration
     home-manager.useGlobalPkgs = true;
-    home-manager.users.trey = { pkgs, ... }: {
+    home-manager.users.trey = { pkgs, ... }: let
+      wallpaperFile = ".wallpaper";
+    in {
       home.stateVersion = config.system.stateVersion;
+
+      home.file = {
+        "${wallpaperFile}" = {
+          source = ./wallpapers/monolith.jpg;
+        };
+      };
 
       # I seem to need both of these configs to allow unfree packages to be installed
       # system-wide as well as via e.g. nix-shell invocations.
@@ -230,7 +241,7 @@ in
         enable = true;
         settings = {
           env.TERM = "xterm-256color";
-          font.normal.family = system-font;
+          font.normal.family = systemFont;
 
           # Alacritty can fade just its background rather than the text in the foreground
           # which is preferable, we'll apply focused/unfocused opacity control via picom.
@@ -336,15 +347,29 @@ in
         in {
           modifier = mod;
           terminal = "alacritty";
-          # TODO: need an output
-          # output = { };
+          output = {
+            "DP-1" = {
+              # Why is it not 60Hz even? So weird...
+              mode = "3440x1440@59.973Hz";
+              bg = "~/${wallpaperFile} fill";
+            };
+          };
+
+          # Replace the swaybar default with waybar
+          bars = [ { command = "waybar"; } ];
+
+          fonts = {
+            names = [ systemFont ];
+            style = "Regular";
+            size = 10.0;
+          };
 
           gaps.inner = 20;
 
           # TODO: need something other than rofi
           # menu = "rofi -show drun";
           # fonts = {
-          #   names = [ system-font ];
+          #   names = [ systemFont ];
           #   style = "Regular";
           #   size = 9.0;
           # };
@@ -368,11 +393,12 @@ in
             "${mod}+Tab" = "exec rofi -show window";
             "${mod}+s" = "exec rofi -show ssh";
             "${mod}+d" = "focus mode_toggle";
+            "${mod}+Shift+r" = "restart";
 
             # TODO: come back to this
             # "${mod}+space" = "exec" + " " + menu;
             "${mod}+Shift+e" = ''
-              exec ${pkgs.i3-gaps}/bin/i3-nagbar -f 'pango:${system-font} 11' \
+              exec ${pkgs.i3-gaps}/bin/i3-nagbar -f 'pango:${systemFont} 11' \
               -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'
             '';
 
@@ -450,10 +476,145 @@ in
       #   # ];
       };
 
+      programs.waybar = {
+        enable = true;
+        systemd.enable = true;
+
+        # font-family?
+        style = ''
+          * {
+              border: none;
+              border-radius: 0;
+              font-family: ${systemFontBold};
+              font-size: 13px;
+              min-height: 0;
+          }
+
+          window#waybar {
+              background: #16191C;
+              color: white;
+          }
+
+          tooltip {
+            background: rgba(43, 48, 59, 0.5);
+            border: 1px solid rgba(100, 114, 125, 0.5);
+          }
+          tooltip label {
+            color: white;
+          }
+
+          #workspaces button {
+              padding: 0 5px;
+              background: transparent;
+              color: white;
+              border-bottom: 3px solid transparent;
+          }
+
+          #workspaces button.focused {
+              background: #64727D;
+              border-bottom: 3px solid white;
+          }
+
+          #mode, #temperature, #cpu, #user, #network {
+              padding: 0 15px;
+          }
+
+          #mode {
+              background: #64727D;
+              border-bottom: 3px solid white;
+          }
+
+          #battery {
+              background-color: #ffffff;
+              color: black;
+          }
+
+          #battery.charging {
+              color: white;
+              background-color: #26A65B;
+          }
+
+          @keyframes blink {
+              to {
+                  background-color: #ffffff;
+                  color: black;
+              }
+          }
+
+          #battery.warning:not(.charging) {
+              background: #f53c3c;
+              color: white;
+              animation-name: blink;
+              animation-duration: 0.5s;
+              animation-timing-function: steps(12);
+              animation-iteration-count: infinite;
+              animation-direction: alternate;
+          }
+        '';
+        settings = {
+          mainBar = {
+            layer = "bottom";
+            position = "bottom";
+            height = 20;
+            reload_style_on_change = true;
+            output = [
+              "DP-1"
+            ];
+
+            # TODO: music player daemon?
+            modules-left = [ "sway/workspaces" "sway/mode" ];
+            modules-center = [ "clock" ];
+            modules-right = [ "network" "cpu" "temperature" "memory" "user" "tray" ];
+
+            "sway/workspaces" = {
+              disable-scroll = true;
+              all-outputs = true;
+            };
+ 
+            "clock" = {
+              interval = 5;
+              # Sunday June 09 00:58:05 (BST) 2024
+              format = "{:%A %B %d %H:%M:%S (%Z) %Y}";
+            };
+
+            "temperature" = {
+              format = "{temperatureF} °F";
+            };
+
+            "memory" = {
+              format = "MEM {used:0.1f}G/{total:0.1f}G";
+            };
+
+            "cpu" = {
+              format = "CPU {usage}%";
+            };
+
+            "user" = {
+              format = "UP {work_d} days {work_H}:{work_M}";
+              interval = 60;
+            };
+
+            "tray" = {
+                "icon-size" = 21;
+                "spacing" = 10;
+            };
+
+            # "custom/hello-from-waybar" = {
+            #   format = "hello {}";
+            #   max-length = 40;
+            #   interval = "once";
+            #   exec = pkgs.writeShellScript "hello-from-waybar" ''
+            #     echo "from within waybar"
+            #   '';
+            # };
+          };
+        };
+      };
+
       # # xsession.windowManager.i3 = {
       # #   enable = true;
 
-      # #   # Gaps for the _asethetic_, note this override can be removed with the next
+      # #   # Gaps for the _asethetic_ note this override can be removed with the next
       # #   # NixOS release. i3-gaps has since merged to mainline i3.
       # #   package = pkgs.i3-gaps;
       # #   config =
@@ -468,7 +629,7 @@ in
       # #       terminal = "alacritty";
       # #       menu = "rofi -show drun";
       # #       fonts = {
-      # #         names = [ system-font ];
+      # #         names = [ systemFont ];
       # #         style = "Regular";
       # #         size = 9.0;
       # #       };
@@ -506,7 +667,7 @@ in
       # programs.rofi = {
       #   enable = true;
       #   terminal = "${pkgs.alacritty}/bin/alacritty";
-      #   font = system-font + " " + builtins.toString 12;
+      #   font = systemFont + " " + builtins.toString 12;
       #   theme = ./theme.rasi;
 
       #   # TODO (tff): this doesn't seem to be working
