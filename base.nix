@@ -393,7 +393,9 @@ in
             "${mod}+Tab" = "exec rofi -show window";
             "${mod}+s" = "exec rofi -show ssh";
             "${mod}+d" = "focus mode_toggle";
-            "${mod}+Shift+r" = "restart";
+
+            # Sway defaults differ from i3 a tiny bit here
+            "${mod}+Shift+r" = "reload";
 
             # TODO: come back to this
             # "${mod}+space" = "exec" + " " + menu;
@@ -476,6 +478,7 @@ in
       #   # ];
       };
 
+      # https://github.com/Alexays/Waybar/wiki
       programs.waybar = {
         enable = true;
         systemd.enable = true;
@@ -491,7 +494,7 @@ in
           }
 
           window#waybar {
-              background: #16191C;
+              background: black;
               color: white;
           }
 
@@ -515,7 +518,8 @@ in
               border-bottom: 3px solid white;
           }
 
-          #mode, #temperature, #cpu, #user, #network {
+
+          #mode, #network, #cpu, #temperature, #memory, #user {
               padding: 0 15px;
           }
 
@@ -564,7 +568,18 @@ in
             # TODO: music player daemon?
             modules-left = [ "sway/workspaces" "sway/mode" ];
             modules-center = [ "clock" ];
-            modules-right = [ "network" "cpu" "temperature" "memory" "user" "tray" ];
+
+            # TODO: need to add battery and charge state for the laptop
+            # Could add wifi and bluetooth stuff as well.
+            modules-right = [ 
+              # TODO: this one is complicated, come back to it.
+              # "network"
+              "cpu"
+              "temperature"
+              "memory"
+              "user"
+              "tray"
+            ];
 
             "sway/workspaces" = {
               disable-scroll = true;
