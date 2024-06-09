@@ -376,6 +376,8 @@ in
 
         wayland.windowManager.sway = {
           enable = true;
+          # Whether to enable sway-session.target on sway startup. We can use this to autostart waybar, etc.
+          systemd.enable = true;
           config =
             let
               mod = "Mod4";
@@ -391,7 +393,7 @@ in
                 };
               };
 
-              # Will start up swaybar by default, I've enabled with programs.waybar.enable
+              # Will start up swaybar by default, I've enabled with programs.waybar.systemd.enable
               bars = [ ];
 
               fonts = {
@@ -401,14 +403,6 @@ in
               };
 
               gaps.inner = 20;
-
-              # TODO: need something other than rofi
-              # menu = "rofi -show drun";
-              # fonts = {
-              #   names = [ systemFont ];
-              #   style = "Regular";
-              #   size = 9.0;
-              # };
 
               modes.resize = lib.mkOptionDefault {
                 # Return, Esc, or Mod+r again to escape resize mode
@@ -433,8 +427,9 @@ in
                 # Sway defaults differ from i3 a tiny bit here
                 "${mod}+Shift+r" = "reload";
 
-                # TODO: come back to this
-                # "${mod}+space" = "exec" + " " + menu;
+                "${mod}+space" = "exec rofi -show drun";
+                
+                # TODO: come back to this, there's a fancy logout prompt thing for wayland
                 "${mod}+Shift+e" = ''
                   exec ${pkgs.i3-gaps}/bin/i3-nagbar -f 'pango:${systemFont} 11' \
                   -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'
@@ -508,58 +503,62 @@ in
                 };
               };
             };
+        };
 
-            # TODO: screenshots
-            # extraConfig = ''
-            #   bindsym --release Print exec import ~/screenshots/$(date --iso-8601=seconds).png;
-            #   default_border pixel 3
-            # '';
-
-          #   # Can mess around with this later...
-          #   # startup = [
-          #   #   # Launch Firefox on start
-          #   #   {command = "firefox";}
-          #   # ];
+        programs.rofi = {
+          enable = true;
+          package = pkgs.rofi-wayland;
+          terminal = "${pkgs.alacritty}/bin/alacritty";
+          font = systemFont + " " + builtins.toString 12;
+          theme = ./rofi.rasi;
+          # TODO (tff): this doesn't seem to be working
+          # plugins = with pkgs; [ rofi-power-menu ];
+          extraConfig = {
+            display-drun = "Applications";
+            display-window = "Windows";
+          };
         };
 
         # https://github.com/Alexays/Waybar/wiki
         programs.waybar = {
           enable = true;
-          systemd.enable = true;
 
-          # font-family?
+          # Start waybar as a systemd unit WantedBy sway-session.target
+          systemd.enable = true;
+          systemd.target = "sway-session.target";
           style = ''
             * {
-                border: none;
-                border-radius: 0;
-                font-family: ${systemFontBold};
-                font-size: 13px;
-                min-height: 0;
+              border: none;
+              border-radius: 0;
+              font-family: ${systemFontBold};
+              font-size: 15px;
+              min-height: 0;
             }
 
             window#waybar {
-                background: black;
-                color: white;
+              background: black;
+              color: white;
             }
 
             tooltip {
               background: rgba(43, 48, 59, 0.5);
               border: 1px solid rgba(100, 114, 125, 0.5);
             }
+
             tooltip label {
               color: white;
             }
 
             #workspaces button {
-                padding: 0 5px;
-                background: transparent;
-                color: white;
-                border-bottom: 3px solid transparent;
+              padding: 0 5px;
+              background: transparent;
+              color: white;
+              border-bottom: 3px solid transparent;
             }
 
             #workspaces button.focused {
-                background: #64727D;
-                border-bottom: 3px solid white;
+              background: #64727D;
+              border-bottom: 3px solid white;
             }
 
             #mode, #network, #cpu, #temperature, #memory  {
@@ -567,55 +566,56 @@ in
               padding-left: 15px;
               border-right: 1px solid white;
             }
-        
+
             #user {
               padding-right: 15px;
               padding-left: 15px;
             }
 
             #mode {
-                background: #64727D;
-                border-bottom: 3px solid white;
+              background: #64727D;
+              border-bottom: 3px solid white;
             }
 
             #battery {
-                background-color: #ffffff;
-                color: black;
+              background-color: #ffffff;
+              color: black;
             }
 
             #battery.charging {
-                color: white;
-                background-color: #26A65B;
+              color: white;
+              background-color: #26A65B;
             }
 
             @keyframes blink {
-                to {
-                    background-color: #ffffff;
-                    color: black;
-                }
+              to {
+                background-color: #ffffff;
+                color: black;
+              }
             }
 
             #battery.warning:not(.charging) {
-                background: #f53c3c;
-                color: white;
-                animation-name: blink;
-                animation-duration: 0.5s;
-                animation-timing-function: steps(12);
-                animation-iteration-count: infinite;
-                animation-direction: alternate;
+              background: #f53c3c;
+              color: white;
+              animation-name: blink;
+              animation-duration: 0.5s;
+              animation-timing-function: steps(12);
+              animation-iteration-count: infinite;
+              animation-direction: alternate;
             }
           '';
           settings = {
             mainBar = {
               layer = "bottom";
               position = "bottom";
-              height = 20;
+              height = 25;
               reload_style_on_change = true;
               output = [
                 "DP-1"
               ];
 
-              # TODO: music player daemon?
+              # TODO: music player daemon? at least get volume levels in here
+              # Also could get the gammastep config in there.
               modules-left = [ "sway/workspaces" "sway/mode" ];
               modules-center = [ "clock" ];
 
@@ -689,20 +689,6 @@ in
           };
         };
 
-        # programs.rofi = {
-        #   enable = true;
-        #   terminal = "${pkgs.alacritty}/bin/alacritty";
-        #   font = systemFont + " " + builtins.toString 12;
-        #   theme = ./theme.rasi;
-
-        #   # TODO (tff): this doesn't seem to be working
-        #   # plugins = with pkgs; [ rofi-power-menu ];
-        #   extraConfig = {
-        #     display-drun = "Applications";
-        #     display-window = "Windows";
-        #   };
-        # };
-
         services.spotifyd = {
           enable = true;
           settings = {
@@ -730,13 +716,6 @@ in
 
       _1password
 
-      # TODO: axe these.
-      # Window manager and desktop enviornment
-      # rofi
-      # i3status
-      # i3lock-color
-      # i3lock-wrap
-
       # For fonts on Wayland
       pango
       sway-contrib.grimshot
@@ -756,7 +735,9 @@ in
       vlc
       ffmpeg
       imagemagick
-      simplescreenrecorder
+
+      # TODO: replace with something wayland compatible
+      # simplescreenrecorder
       meshlab
       ffmpeg-full
 
