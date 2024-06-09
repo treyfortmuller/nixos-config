@@ -7,6 +7,10 @@ let
 
   # TODO:
   i3lock-wrap = pkgs.callPackage ./i3lock-wrap.nix { };
+
+  # Preferred datetime format, used throughout the system
+  # Sunday June 09 00:58:05 (BST) 2024
+  preferredStrftime = "%A %B %d %H:%M:%S (%Z) %Y";
 in
 {
   config = {
@@ -114,6 +118,26 @@ in
     # Enable CUPS to print documents.
     services.printing.enable = true;
     services.printing.drivers = with pkgs; [ gutenprint ];
+
+    services.greetd = {
+      enable = true;
+      settings = {
+        default_session.command = ''
+          ${pkgs.greetd.tuigreet}/bin/tuigreet \
+            --time \
+            --time-format "${preferredStrftime}" \
+            --remember \
+            --remember-session \
+            --asterisks \
+            --user-menu \
+            --cmd sway
+        '';
+      };
+    };
+
+    environment.etc."greetd/environments".text = ''
+      sway
+    '';
 
     # Enable sound.
     # sound.enable = true;
@@ -355,8 +379,8 @@ in
             };
           };
 
-          # Replace the swaybar default with waybar
-          bars = [ { command = "waybar"; } ];
+          # Will start up swaybar by default, I've enabled with programs.waybar.enable
+          bars = [ ];
 
           fonts = {
             names = [ systemFont ];
@@ -594,8 +618,7 @@ in
  
             "clock" = {
               interval = 5;
-              # Sunday June 09 00:58:05 (BST) 2024
-              format = "{:%A %B %d %H:%M:%S (%Z) %Y}";
+              format = "{:${preferredStrftime}}";
             };
 
             "cpu" = {
