@@ -518,9 +518,15 @@ in
               border-bottom: 3px solid white;
           }
 
-
-          #mode, #network, #cpu, #temperature, #memory, #user {
-              padding: 0 15px;
+          #mode, #network, #cpu, #temperature, #memory  {
+            padding-right: 15px;
+            padding-left: 15px;
+            border-right: 1px solid white;
+          }
+        
+          #user {
+            padding-right: 15px;
+            padding-left: 15px;
           }
 
           #mode {
@@ -592,6 +598,10 @@ in
               format = "{:%A %B %d %H:%M:%S (%Z) %Y}";
             };
 
+            "cpu" = {
+              format = "CPU {usage}%";
+            };
+
             "temperature" = {
               format = "{temperatureF} °F";
             };
@@ -600,9 +610,6 @@ in
               format = "MEM {used:0.1f}G/{total:0.1f}G";
             };
 
-            "cpu" = {
-              format = "CPU {usage}%";
-            };
 
             "user" = {
               format = "UP {work_d} days {work_H}:{work_M}";
