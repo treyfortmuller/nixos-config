@@ -89,7 +89,7 @@ in
     #   enable = true;
     #   wrapperFeatures.gtk = true;
     # };
-    
+
     # Wayland requires policykit and OpenGL
     security.polkit.enable = true;
     hardware.opengl.enable = true;
@@ -169,546 +169,552 @@ in
 
     # home-manager configuration
     home-manager.useGlobalPkgs = true;
-    home-manager.users.trey = { pkgs, ... }: let
-      wallpaperFile = ".wallpaper";
-    in {
-      home.stateVersion = config.system.stateVersion;
+    home-manager.users.trey = { pkgs, ... }:
+      let
+        wallpaperFile = ".wallpaper";
+      in
+      {
+        home.stateVersion = config.system.stateVersion;
 
-      home.file = {
-        "${wallpaperFile}" = {
-          source = ./wallpapers/monolith.jpg;
-        };
-      };
-
-      # I seem to need both of these configs to allow unfree packages to be installed
-      # system-wide as well as via e.g. nix-shell invocations.
-      nixpkgs.config.allowUnfree = true;
-
-      # Manage the ~/.config/nixpkgs/config.nix file.
-      xdg.configFile."nixpkgs/config.nix".text = ''
-        { allowUnfree = true; }
-      '';
-
-      # SSH configuration docs
-      # https://linux.die.net/man/5/ssh_config
-      programs.ssh = {
-        enable = true;
-        extraConfig = ''
-          ConnectTimeout=5
-        '';
-      };
-
-      programs.bash = let
-        tput = "${pkgs.ncurses}/bin/tput";
-
-        # Common local variables for colorcoding the bash prompt and banner.
-        commonFormatting = ''
-          local normal=$(${tput} sgr0)
-          local bold=$(${tput} bold)
-          local blue=$(${tput} setaf 12)    #0000ff
-          local green=$(${tput} setaf 2)    #008000
-          local bluebold=''${blue}''${bold}
-          local greenbold=''${green}''${bold}
-
-          # Indicates non-printing characters for the bash prompt
-          local normalnp="\[''${normal}\]"
-          local blueboldnp="\[''${bluebold}\]"
-          local greenboldnp="\[''${greenbold}\]"
-        '';
-      in {
-        enable = true;
-        bashrcExtra = ''
-          export NIX_PATH=nixpkgs=/home/trey/sources/anduril-nixpkgs:$NIX_PATH
-
-          function prompt() {
-            ${commonFormatting}
-            customprompt="\n''${greenboldnp}\t (''${blueboldnp}\W''${greenboldnp}) \$''${normalnp} "
-          }
-          prompt
-          export PS1="$customprompt"
-        '';
-
-        initExtra = ''
-          function banner() {
-              ${commonFormatting}
-              echo
-              echo "    ''${bluebold}$(whoami)''${normal}@''${bluebold}$(hostname)''${normal}"
-              echo
-              echo "    ''${bluebold}NixOS:''${normal} $(nixos-version)"
-              echo "    ''${bluebold}Date:''${normal} $(date +"${preferredStrftime}")"
-              echo
-          }
-
-          banner
-        '';
-
-        shellAliases = let systemPackages = config.environment.systemPackages;
-        in {
-          ll = "ls -l -h";
-          csv = "column -s, -t ";
-          jfu = "journalctl -fu";
-          ip = "ip -c";
-          perms = ''stat --format "%a %n"'';
-          nixos-config = "cd ~/sources/nixos-config";
-          diff = "diff -y --color";
-        } // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) {
-          clock = "tty-clock -btc";
-        };
-      };
-
-      programs.fzf = {
-        enable = true;
-        enableBashIntegration = true;
-
-        # Can go crazy with this later...
-        # colors = { };
-
-        # Haven't experimented with this yet, uses fxf-tmux
-        # tmux.enableShellIntegration
-      };
-
-      programs.alacritty = {
-        enable = true;
-        settings = {
-          env.TERM = "xterm-256color";
-          font.normal.family = systemFont;
-
-          # Alacritty can fade just its background rather than the text in the foreground
-          # which is preferable, we'll apply focused/unfocused opacity control via picom.
-          window.opacity = 0.9;
-          window.padding = {
-            # Pixel padding interior to the window
-            x = 8;
-            y = 8;
+        home.file = {
+          "${wallpaperFile}" = {
+            source = ./wallpapers/monolith.jpg;
           };
         };
-      };
 
-      programs.neovim = {
-        enable = true;
-        viAlias = true;
-        vimAlias = true;
-        plugins = with pkgs.vimPlugins; [ vim-nix rust-vim ];
-        extraConfig = ''
-          set number
+        # I seem to need both of these configs to allow unfree packages to be installed
+        # system-wide as well as via e.g. nix-shell invocations.
+        nixpkgs.config.allowUnfree = true;
+
+        # Manage the ~/.config/nixpkgs/config.nix file.
+        xdg.configFile."nixpkgs/config.nix".text = ''
+          { allowUnfree = true; }
         '';
-      };
 
-      programs.git = {
-        enable = true;
-        userName = "Trey Fortmuller";
-        userEmail = "tfortmuller@mac.com";
-
-        # Globally ignored
-        ignores = [ "*~" "*.swp" ];
-
-        aliases = {
-          # List aliases
-          la = "!git config --list | grep -E '^alias' | cut -c 7-";
-
-          # Beautiful one-liner log, last 20 commits
-          l = "log --pretty=\"%C(Yellow)%h  %C(reset)%ad (%C(Green)%cr%C(reset))%x09 %C(Cyan)%an %C(reset)%s\" --date=short -20";
-
-          # Most recently checked-out branches
-          recent = "!git reflog show --pretty=format:'%gs ~ %gd' --date=relative | grep 'checkout:' | grep -oE '[^ ]+ ~ .*' | awk -F~ '!seen[$1]++' | head -n 10 | awk -F' ~ HEAD@{' '{printf(\"  \\033[33m%s: \\033[37m %s\\033[0m\\n\", substr($2, 1, length($2)-1), $1)}'";
-
-          last = "log -1 HEAD";
-          unstage = "reset HEAD --";
-          b = "branch --show";
-          a = "add";
-          c = "commit";
-          s = "status -s";
-          co = "checkout";
-          cob = "checkout -b";
+        # SSH configuration docs
+        # https://linux.die.net/man/5/ssh_config
+        programs.ssh = {
+          enable = true;
+          extraConfig = ''
+            ConnectTimeout=5
+          '';
         };
 
-        extraConfig = {
-          pull.rebase = false;
-          push.autoSetupRemote = true;
-          init.defaultBranch = "master";
-          core.editor = "vim";
-        };
-      };
+        programs.bash =
+          let
+            tput = "${pkgs.ncurses}/bin/tput";
 
-      programs.vscode = {
-        enable = true;
-        enableExtensionUpdateCheck = false;
-        enableUpdateCheck = false;
-        extensions = with pkgs.vscode-extensions; [
-          ms-vscode-remote.remote-ssh
-          ms-python.python
-          ms-vscode.cpptools
-          bbenoist.nix
-          eamodio.gitlens
-          zxh404.vscode-proto3
-          tamasfe.even-better-toml
-          matklad.rust-analyzer
-          arrterian.nix-env-selector
-          streetsidesoftware.code-spell-checker
-        ];
-        userSettings = {
-          "workbench.colorTheme" = "Default Dark+";
-          "explorer.confirmDelete" = false;
-          "explorer.confirmDragAndDrop" = false;
+            # Common local variables for colorcoding the bash prompt and banner.
+            commonFormatting = ''
+              local normal=$(${tput} sgr0)
+              local bold=$(${tput} bold)
+              local blue=$(${tput} setaf 12)    #0000ff
+              local green=$(${tput} setaf 2)    #008000
+              local bluebold=''${blue}''${bold}
+              local greenbold=''${green}''${bold}
 
-          "editor.fontFamily" = "'JetBrains Mono Medium'";
-          "editor.fontLigatures" = true;
-          "editor.minimap.enabled" = true;
+              # Indicates non-printing characters for the bash prompt
+              local normalnp="\[''${normal}\]"
+              local blueboldnp="\[''${bluebold}\]"
+              local greenboldnp="\[''${greenbold}\]"
+            '';
+          in
+          {
+            enable = true;
+            bashrcExtra = ''
+              export NIX_PATH=nixpkgs=/home/trey/sources/anduril-nixpkgs:$NIX_PATH
 
-          "[rust]"."editor.defaultFormatter" = "rust-lang.rust-analyzer";
-          "[rust]"."editor.formatOnSave" = true;
-          "rust-analyzer.cargo.features" = "all";
-
-          "[nix]"."editor.tabSize" = 2;
-
-          "cSpell.enableFiletypes" = [
-            "nix"
-          ];
-
-          "window.zoomLevel" = -1;
-          "editor.rulers" = [ 120 ];
-        };
-      };
-
-      wayland.windowManager.sway = {
-        enable = true;
-        config = let
-          mod = "Mod4";
-        in {
-          modifier = mod;
-          terminal = "alacritty";
-          output = {
-            "DP-1" = {
-              # Why is it not 60Hz even? So weird...
-              mode = "3440x1440@59.973Hz";
-              bg = "~/${wallpaperFile} fill";
-            };
-          };
-
-          # Will start up swaybar by default, I've enabled with programs.waybar.enable
-          bars = [ ];
-
-          fonts = {
-            names = [ systemFont ];
-            style = "Regular";
-            size = 10.0;
-          };
-
-          gaps.inner = 20;
-
-          # TODO: need something other than rofi
-          # menu = "rofi -show drun";
-          # fonts = {
-          #   names = [ systemFont ];
-          #   style = "Regular";
-          #   size = 9.0;
-          # };
-
-          modes.resize = lib.mkOptionDefault {
-            # Return, Esc, or Mod+r again to escape resize mode
-            "Return" = "mode default";
-            "Escape" = "mode default";
-            "${mod}+r" = "mode default";
-
-            # Left to shrink, right to grow in width
-            # Up to shrink, down to grow in height
-            "Left" = "resize shrink width 75 px";
-            "Right" = "resize grow width 75 px";
-            "Down" = "resize grow height 75 px";
-            "Up" = "resize shrink height 75 px";
-          };
-
-          keybindings = lib.mkOptionDefault {
-            "${mod}+Escape" = "exec ${pkgs.swaylock-effects}/bin/swaylock";
-            "${mod}+Tab" = "exec rofi -show window";
-            "${mod}+s" = "exec rofi -show ssh";
-            "${mod}+d" = "focus mode_toggle";
-
-            # Sway defaults differ from i3 a tiny bit here
-            "${mod}+Shift+r" = "reload";
-
-            # TODO: come back to this
-            # "${mod}+space" = "exec" + " " + menu;
-            "${mod}+Shift+e" = ''
-              exec ${pkgs.i3-gaps}/bin/i3-nagbar -f 'pango:${systemFont} 11' \
-              -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'
+              function prompt() {
+                ${commonFormatting}
+                customprompt="\n''${greenboldnp}\t (''${blueboldnp}\W''${greenboldnp}) \$''${normalnp} "
+              }
+              prompt
+              export PS1="$customprompt"
             '';
 
-            # TODO (tff): Disable stacking and tabbed layouts
-            # "${mod}+w" = ""; <- remove this from the attrset defaults
-            "${mod}+Shift+f" = "floating toggle";
-            "${mod}+BackSpace" = "split toggle";
+            initExtra = ''
+              function banner() {
+                  ${commonFormatting}
+                  echo
+                  echo "    ''${bluebold}$(whoami)''${normal}@''${bluebold}$(hostname)''${normal}"
+                  echo
+                  echo "    ''${bluebold}NixOS:''${normal} $(nixos-version)"
+                  echo "    ''${bluebold}Date:''${normal} $(date +"${preferredStrftime}")"
+                  echo
+              }
 
-            # TODO (tff): get the volume in the i3 status bar and refresh it
-            # Volume control
-            "XF86AudioRaiseVolume" =
-              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
-            "XF86AudioLowerVolume" =
-              "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
-            "XF86AudioMute" =
-              "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
-            "XF86AudioMicMute" =
-              "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
+              banner
+            '';
 
-            # Brightness control for laptops
-            "XF86MonBrightnessDown" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%-";
-            "XF86MonBrightnessUp" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%+";
+            shellAliases =
+              let systemPackages = config.environment.systemPackages;
+              in {
+                ll = "ls -l -h";
+                csv = "column -s, -t ";
+                jfu = "journalctl -fu";
+                ip = "ip -c";
+                perms = ''stat --format "%a %n"'';
+                nixos-config = "cd ~/sources/nixos-config";
+                diff = "diff -y --color";
+              } // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) {
+                clock = "tty-clock -btc";
+              };
           };
 
-          colors = {
-            background = "#ffffff";
-            focused = {
-              border = "#49abf5";
-              background = "#285577";
-              text = "#ffffff";
-              indicator = "#9cccf0";
-              childBorder = "#49abf5";
-            };
-            focusedInactive = {
-              border = "#333333";
-              background = "#5f676a";
-              text = "#ffffff";
-              indicator = "#484e50";
-              childBorder = "#5f676a";
-            };
-            unfocused = {
-              border = "#333333";
-              background = "#222222";
-              text = "#888888";
-              indicator = "#292d2e";
-              childBorder = "#222222";
-            };
-            urgent = {
-              border = "#2f343a";
-              background = "#900000";
-              text = "#ffffff";
-              indicator = "#900000";
-              childBorder = "#900000";
-            };
-            placeholder = {
-              border = "#000000";
-              background = "#0c0c0c";
-              text = "#ffffff";
-              indicator = "#000000";
-              childBorder = "#0c0c0c";
+        programs.fzf = {
+          enable = true;
+          enableBashIntegration = true;
+
+          # Can go crazy with this later...
+          # colors = { };
+
+          # Haven't experimented with this yet, uses fxf-tmux
+          # tmux.enableShellIntegration
+        };
+
+        programs.alacritty = {
+          enable = true;
+          settings = {
+            env.TERM = "xterm-256color";
+            font.normal.family = systemFont;
+
+            # Alacritty can fade just its background rather than the text in the foreground
+            # which is preferable, we'll apply focused/unfocused opacity control via picom.
+            window.opacity = 0.9;
+            window.padding = {
+              # Pixel padding interior to the window
+              x = 8;
+              y = 8;
             };
           };
         };
-        
-      #   # TODO: doubt this is working...
-      #   # extraConfig = ''
-      #   #   bindsym --release Print exec import ~/screenshots/$(date --iso-8601=seconds).png;
-      #   #   default_border pixel 3
-      #   # '';
 
-      #   # Can mess around with this later...
-      #   # startup = [
-      #   #   # Launch Firefox on start
-      #   #   {command = "firefox";}
-      #   # ];
-      };
+        programs.neovim = {
+          enable = true;
+          viAlias = true;
+          vimAlias = true;
+          plugins = with pkgs.vimPlugins; [ vim-nix rust-vim ];
+          extraConfig = ''
+            set number
+          '';
+        };
 
-      # https://github.com/Alexays/Waybar/wiki
-      programs.waybar = {
-        enable = true;
-        systemd.enable = true;
+        programs.git = {
+          enable = true;
+          userName = "Trey Fortmuller";
+          userEmail = "tfortmuller@mac.com";
 
-        # font-family?
-        style = ''
-          * {
-              border: none;
-              border-radius: 0;
-              font-family: ${systemFontBold};
-              font-size: 13px;
-              min-height: 0;
-          }
+          # Globally ignored
+          ignores = [ "*~" "*.swp" ];
 
-          window#waybar {
-              background: black;
-              color: white;
-          }
+          aliases = {
+            # List aliases
+            la = "!git config --list | grep -E '^alias' | cut -c 7-";
 
-          tooltip {
-            background: rgba(43, 48, 59, 0.5);
-            border: 1px solid rgba(100, 114, 125, 0.5);
-          }
-          tooltip label {
-            color: white;
-          }
+            # Beautiful one-liner log, last 20 commits
+            l = "log --pretty=\"%C(Yellow)%h  %C(reset)%ad (%C(Green)%cr%C(reset))%x09 %C(Cyan)%an %C(reset)%s\" --date=short -20";
 
-          #workspaces button {
-              padding: 0 5px;
-              background: transparent;
-              color: white;
-              border-bottom: 3px solid transparent;
-          }
+            # Most recently checked-out branches
+            recent = "!git reflog show --pretty=format:'%gs ~ %gd' --date=relative | grep 'checkout:' | grep -oE '[^ ]+ ~ .*' | awk -F~ '!seen[$1]++' | head -n 10 | awk -F' ~ HEAD@{' '{printf(\"  \\033[33m%s: \\033[37m %s\\033[0m\\n\", substr($2, 1, length($2)-1), $1)}'";
 
-          #workspaces button.focused {
-              background: #64727D;
-              border-bottom: 3px solid white;
-          }
+            last = "log -1 HEAD";
+            unstage = "reset HEAD --";
+            b = "branch --show";
+            a = "add";
+            c = "commit";
+            s = "status -s";
+            co = "checkout";
+            cob = "checkout -b";
+          };
 
-          #mode, #network, #cpu, #temperature, #memory  {
-            padding-right: 15px;
-            padding-left: 15px;
-            border-right: 1px solid white;
-          }
-        
-          #user {
-            padding-right: 15px;
-            padding-left: 15px;
-          }
+          extraConfig = {
+            pull.rebase = false;
+            push.autoSetupRemote = true;
+            init.defaultBranch = "master";
+            core.editor = "vim";
+          };
+        };
 
-          #mode {
-              background: #64727D;
-              border-bottom: 3px solid white;
-          }
+        programs.vscode = {
+          enable = true;
+          enableExtensionUpdateCheck = false;
+          enableUpdateCheck = false;
+          extensions = with pkgs.vscode-extensions; [
+            ms-vscode-remote.remote-ssh
+            ms-python.python
+            ms-vscode.cpptools
+            bbenoist.nix
+            eamodio.gitlens
+            zxh404.vscode-proto3
+            tamasfe.even-better-toml
+            matklad.rust-analyzer
+            arrterian.nix-env-selector
+            streetsidesoftware.code-spell-checker
+          ];
+          userSettings = {
+            "workbench.colorTheme" = "Default Dark+";
+            "explorer.confirmDelete" = false;
+            "explorer.confirmDragAndDrop" = false;
 
-          #battery {
-              background-color: #ffffff;
-              color: black;
-          }
+            "editor.fontFamily" = "'JetBrains Mono Medium'";
+            "editor.fontLigatures" = true;
+            "editor.minimap.enabled" = true;
 
-          #battery.charging {
-              color: white;
-              background-color: #26A65B;
-          }
+            "[rust]"."editor.defaultFormatter" = "rust-lang.rust-analyzer";
+            "[rust]"."editor.formatOnSave" = true;
+            "rust-analyzer.cargo.features" = "all";
 
-          @keyframes blink {
-              to {
-                  background-color: #ffffff;
-                  color: black;
-              }
-          }
+            "[nix]"."editor.tabSize" = 2;
 
-          #battery.warning:not(.charging) {
-              background: #f53c3c;
-              color: white;
-              animation-name: blink;
-              animation-duration: 0.5s;
-              animation-timing-function: steps(12);
-              animation-iteration-count: infinite;
-              animation-direction: alternate;
-          }
-        '';
-        settings = {
-          mainBar = {
-            layer = "bottom";
-            position = "bottom";
-            height = 20;
-            reload_style_on_change = true;
-            output = [
-              "DP-1"
+            "cSpell.enableFiletypes" = [
+              "nix"
             ];
 
-            # TODO: music player daemon?
-            modules-left = [ "sway/workspaces" "sway/mode" ];
-            modules-center = [ "clock" ];
+            "window.zoomLevel" = -1;
+            "editor.rulers" = [ 120 ];
+          };
+        };
 
-            # TODO: need to add battery and charge state for the laptop
-            # Could add wifi and bluetooth stuff as well.
-            modules-right = [ 
-              # TODO: this one is complicated, come back to it.
-              # "network"
-              "cpu"
-              "temperature"
-              "memory"
-              "user"
-              "tray"
-            ];
+        wayland.windowManager.sway = {
+          enable = true;
+          config =
+            let
+              mod = "Mod4";
+            in
+            {
+              modifier = mod;
+              terminal = "alacritty";
+              output = {
+                "DP-1" = {
+                  # Why is it not 60Hz even? So weird...
+                  mode = "3440x1440@59.973Hz";
+                  bg = "~/${wallpaperFile} fill";
+                };
+              };
 
-            "sway/workspaces" = {
-              disable-scroll = true;
-              all-outputs = true;
+              # Will start up swaybar by default, I've enabled with programs.waybar.enable
+              bars = [ ];
+
+              fonts = {
+                names = [ systemFont ];
+                style = "Regular";
+                size = 10.0;
+              };
+
+              gaps.inner = 20;
+
+              # TODO: need something other than rofi
+              # menu = "rofi -show drun";
+              # fonts = {
+              #   names = [ systemFont ];
+              #   style = "Regular";
+              #   size = 9.0;
+              # };
+
+              modes.resize = lib.mkOptionDefault {
+                # Return, Esc, or Mod+r again to escape resize mode
+                "Return" = "mode default";
+                "Escape" = "mode default";
+                "${mod}+r" = "mode default";
+
+                # Left to shrink, right to grow in width
+                # Up to shrink, down to grow in height
+                "Left" = "resize shrink width 75 px";
+                "Right" = "resize grow width 75 px";
+                "Down" = "resize grow height 75 px";
+                "Up" = "resize shrink height 75 px";
+              };
+
+              keybindings = lib.mkOptionDefault {
+                "${mod}+Escape" = "exec ${pkgs.swaylock-effects}/bin/swaylock";
+                "${mod}+Tab" = "exec rofi -show window";
+                "${mod}+s" = "exec rofi -show ssh";
+                "${mod}+d" = "focus mode_toggle";
+
+                # Sway defaults differ from i3 a tiny bit here
+                "${mod}+Shift+r" = "reload";
+
+                # TODO: come back to this
+                # "${mod}+space" = "exec" + " " + menu;
+                "${mod}+Shift+e" = ''
+                  exec ${pkgs.i3-gaps}/bin/i3-nagbar -f 'pango:${systemFont} 11' \
+                  -t warning -m 'Do you want to exit i3?' -b 'Yes' 'i3-msg exit'
+                '';
+
+                # Screenshots via grimshot, save to screenshots dir
+                "Print" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area ~/screenshots/$(date --iso-8601=seconds).png";
+                "${mod}+Print" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save window ~/screenshots/$(date --iso-8601=seconds).png";
+
+                # Copy to the clipboard and don't save
+                "Shift+Print" = "exec grimshot copy area";
+                "${mod}+Shift+Print" = "exec grimshot copy window";
+
+                # TODO (tff): Disable stacking and tabbed layouts
+                # "${mod}+w" = ""; <- remove this from the attrset defaults
+                "${mod}+Shift+f" = "floating toggle";
+                "${mod}+BackSpace" = "split toggle";
+
+                # TODO (tff): get the volume in the i3 status bar and refresh it
+                # Volume control
+                "XF86AudioRaiseVolume" =
+                  "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
+                "XF86AudioLowerVolume" =
+                  "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
+                "XF86AudioMute" =
+                  "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
+                "XF86AudioMicMute" =
+                  "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
+
+                # Brightness control for laptops
+                "XF86MonBrightnessDown" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%-";
+                "XF86MonBrightnessUp" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%+";
+              };
+
+              colors = {
+                background = "#ffffff";
+                focused = {
+                  border = "#49abf5";
+                  background = "#285577";
+                  text = "#ffffff";
+                  indicator = "#9cccf0";
+                  childBorder = "#49abf5";
+                };
+                focusedInactive = {
+                  border = "#333333";
+                  background = "#5f676a";
+                  text = "#ffffff";
+                  indicator = "#484e50";
+                  childBorder = "#5f676a";
+                };
+                unfocused = {
+                  border = "#333333";
+                  background = "#222222";
+                  text = "#888888";
+                  indicator = "#292d2e";
+                  childBorder = "#222222";
+                };
+                urgent = {
+                  border = "#2f343a";
+                  background = "#900000";
+                  text = "#ffffff";
+                  indicator = "#900000";
+                  childBorder = "#900000";
+                };
+                placeholder = {
+                  border = "#000000";
+                  background = "#0c0c0c";
+                  text = "#ffffff";
+                  indicator = "#000000";
+                  childBorder = "#0c0c0c";
+                };
+              };
             };
- 
-            "clock" = {
-              interval = 5;
-              format = "{:${preferredStrftime}}";
-            };
 
-            "cpu" = {
-              format = "CPU {usage}%";
-            };
+            # TODO: screenshots
+            # extraConfig = ''
+            #   bindsym --release Print exec import ~/screenshots/$(date --iso-8601=seconds).png;
+            #   default_border pixel 3
+            # '';
 
-            "temperature" = {
-              format = "{temperatureF} °F";
-            };
+          #   # Can mess around with this later...
+          #   # startup = [
+          #   #   # Launch Firefox on start
+          #   #   {command = "firefox";}
+          #   # ];
+        };
 
-            "memory" = {
-              format = "MEM {used:0.1f}G/{total:0.1f}G";
-            };
+        # https://github.com/Alexays/Waybar/wiki
+        programs.waybar = {
+          enable = true;
+          systemd.enable = true;
+
+          # font-family?
+          style = ''
+            * {
+                border: none;
+                border-radius: 0;
+                font-family: ${systemFontBold};
+                font-size: 13px;
+                min-height: 0;
+            }
+
+            window#waybar {
+                background: black;
+                color: white;
+            }
+
+            tooltip {
+              background: rgba(43, 48, 59, 0.5);
+              border: 1px solid rgba(100, 114, 125, 0.5);
+            }
+            tooltip label {
+              color: white;
+            }
+
+            #workspaces button {
+                padding: 0 5px;
+                background: transparent;
+                color: white;
+                border-bottom: 3px solid transparent;
+            }
+
+            #workspaces button.focused {
+                background: #64727D;
+                border-bottom: 3px solid white;
+            }
+
+            #mode, #network, #cpu, #temperature, #memory  {
+              padding-right: 15px;
+              padding-left: 15px;
+              border-right: 1px solid white;
+            }
+        
+            #user {
+              padding-right: 15px;
+              padding-left: 15px;
+            }
+
+            #mode {
+                background: #64727D;
+                border-bottom: 3px solid white;
+            }
+
+            #battery {
+                background-color: #ffffff;
+                color: black;
+            }
+
+            #battery.charging {
+                color: white;
+                background-color: #26A65B;
+            }
+
+            @keyframes blink {
+                to {
+                    background-color: #ffffff;
+                    color: black;
+                }
+            }
+
+            #battery.warning:not(.charging) {
+                background: #f53c3c;
+                color: white;
+                animation-name: blink;
+                animation-duration: 0.5s;
+                animation-timing-function: steps(12);
+                animation-iteration-count: infinite;
+                animation-direction: alternate;
+            }
+          '';
+          settings = {
+            mainBar = {
+              layer = "bottom";
+              position = "bottom";
+              height = 20;
+              reload_style_on_change = true;
+              output = [
+                "DP-1"
+              ];
+
+              # TODO: music player daemon?
+              modules-left = [ "sway/workspaces" "sway/mode" ];
+              modules-center = [ "clock" ];
+
+              # TODO: need to add battery and charge state for the laptop
+              # Could add wifi and bluetooth stuff as well.
+              modules-right = [
+                # TODO: this one is complicated, come back to it.
+                # "network"
+                "cpu"
+                "temperature"
+                "memory"
+                "user"
+                "tray"
+              ];
+
+              "sway/workspaces" = {
+                disable-scroll = true;
+                all-outputs = true;
+              };
+
+              "clock" = {
+                interval = 5;
+                format = "{:${preferredStrftime}}";
+              };
+
+              "cpu" = {
+                format = "CPU {usage}%";
+              };
+
+              "temperature" = {
+                format = "{temperatureF} °F";
+              };
+
+              "memory" = {
+                format = "MEM {used:0.1f}G/{total:0.1f}G";
+              };
 
 
-            "user" = {
-              format = "UP {work_d} days {work_H}:{work_M}";
-              interval = 60;
-            };
+              "user" = {
+                format = "UP {work_d} days {work_H}:{work_M}";
+                interval = 60;
+              };
 
-            "tray" = {
+              "tray" = {
                 "icon-size" = 21;
                 "spacing" = 10;
+              };
             };
+          };
+        };
 
-            # "custom/hello-from-waybar" = {
-            #   format = "hello {}";
-            #   max-length = 40;
-            #   interval = "once";
-            #   exec = pkgs.writeShellScript "hello-from-waybar" ''
-            #     echo "from within waybar"
-            #   '';
-            # };
+        # Swaylock doesn't have all the features of i3lock-colors, so this is kind of a joke.
+        programs.swaylock = {
+          enable = true;
+          package = pkgs.swaylock-effects;
+          settings = {
+            color = "000000ff";
+            ignore-empty-password = true;
+            font = "${systemFont}";
+            clock = true;
+            timestr = "${preferredTimeStr}";
+            datestr = "${preferredDateStr}";
+            screenshots = false;
+            indicator = true;
+            inside-color = "000000ff";
+            inside-clear-color = "000000ff";
+            inside-caps-lock-color = "000000ff";
+            text-color = "ffffffff";
+            text-clear-color = "ffffffff";
+            text-caps-lock-color = "ffffffff";
+          };
+        };
+
+        # programs.rofi = {
+        #   enable = true;
+        #   terminal = "${pkgs.alacritty}/bin/alacritty";
+        #   font = systemFont + " " + builtins.toString 12;
+        #   theme = ./theme.rasi;
+
+        #   # TODO (tff): this doesn't seem to be working
+        #   # plugins = with pkgs; [ rofi-power-menu ];
+        #   extraConfig = {
+        #     display-drun = "Applications";
+        #     display-window = "Windows";
+        #   };
+        # };
+
+        services.spotifyd = {
+          enable = true;
+          settings = {
+            global = {
+              username_cmd = "${pkgs._1password}/bin/op item get spotify --fields username";
+              password_cmd = "${pkgs._1password}/bin/op item get spotify --fields password";
+              device_name = "nixos";
+            };
           };
         };
       };
-
-      # Swaylock doesn't have all the features of i3lock-colors, so this is kind of a joke.
-      programs.swaylock = {
-        enable = true;
-        package = pkgs.swaylock-effects;
-        settings = {
-          color = "000000ff";                        
-          ignore-empty-password = true;
-          font="${systemFont}";
-          clock = true;
-          timestr="${preferredTimeStr}";
-          datestr="${preferredDateStr}";
-          screenshots = false;
-          indicator = true;
-          inside-color = "000000ff";
-          inside-clear-color = "000000ff";
-          inside-caps-lock-color = "000000ff";
-          text-color = "ffffffff";
-          text-clear-color = "ffffffff";
-          text-caps-lock-color = "ffffffff";
-        };
-      };
-
-      # programs.rofi = {
-      #   enable = true;
-      #   terminal = "${pkgs.alacritty}/bin/alacritty";
-      #   font = systemFont + " " + builtins.toString 12;
-      #   theme = ./theme.rasi;
-
-      #   # TODO (tff): this doesn't seem to be working
-      #   # plugins = with pkgs; [ rofi-power-menu ];
-      #   extraConfig = {
-      #     display-drun = "Applications";
-      #     display-window = "Windows";
-      #   };
-      # };
-
-      services.spotifyd = {
-        enable = true;
-        settings = {
-          global = {
-            username_cmd = "${pkgs._1password}/bin/op item get spotify --fields username";
-            password_cmd = "${pkgs._1password}/bin/op item get spotify --fields password";
-            device_name = "nixos";
-          };
-        };
-      };
-    };
 
     # The head of home-manager master has a neovim.defaultEditor option
     # to accomplish this, but its not available in 22.11
@@ -731,6 +737,10 @@ in
       # i3status
       # i3lock-color
       # i3lock-wrap
+
+      # For fonts on Wayland
+      pango
+      sway-contrib.grimshot
 
       # Thirdparty native
       unstable.zoom-us
@@ -811,9 +821,6 @@ in
       sshping
       nethogs
       brightnessctl
-
-      # TODO - this thing kinda sucks, replace with feh
-      setroot
     ];
 
     fonts.packages = with pkgs; [ jetbrains-mono ];
