@@ -94,6 +94,7 @@ in
     security.polkit.enable = true;
     hardware.opengl.enable = true;
 
+
     # # Enable the X11 windowing system.
     # services.xserver = {
     #   enable = true;
@@ -783,7 +784,7 @@ in
       # Tools
       wget
       ack
-      xclip
+      wl-clipboard
       fzf
       i2c-tools
       psmisc
