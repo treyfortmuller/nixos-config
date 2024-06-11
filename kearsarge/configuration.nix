@@ -12,6 +12,7 @@ in {
       primaryDisplayOutput = "DP-1";
       primaryDisplayModeString = "3440x1440@59.973Hz";
       nvidiaProprietaryChaos = false;
+      cudaDev = false;
       includeDockerSpecialisation = false;
     };
 
