@@ -1,22 +1,26 @@
 # Kearsarge desktop configuration
 
-# TODO (tff): none of this is setup yet, revisit!
 { config, pkgs, lib, ... }:
 let
 in {
   imports = [ ./hardware-configuration.nix ];
 
   config = {
-    networking.hostName = "kearsarge";
+    sierras = {
+      enable = true;
+      hostName = "kearsarge";
+      primaryDisplayOutput = "DP-1";
+      primaryDisplayModeString = "3440x1440@59.973Hz";
+      nvidiaProprietaryChaos = false;
+      includeDockerSpecialisation = false;
+    };
 
-    # This value determines the NixOS release from which the default
-    # settings for stateful data, like file locations and database versions
-    # on your system were taken. It‘s perfectly fine and recommended to leave
-    # this value at the release version of the first install of this system.
-    # Before changing this value read the documentation for this option
-    # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
     system.stateVersion = "22.11"; # Did you read the comment?
 
+    # TODO (tff): make this determined on 
+    powerManagement.cpuFreqGovernor = "performance";
+
+    # TODO (tff): definitely need to check out Pipewire instead...
     # Enable sound.
     sound.enable = true;
     hardware.pulseaudio.enable = true;

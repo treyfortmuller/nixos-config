@@ -2,6 +2,8 @@
 
 { config, pkgs, lib, inputs, outputs, ... }:
 let
+  cfg = config.sierras;
+
   systemFont = "JetBrains Mono";
   systemFontBold = "JetBrains Mono SemiBold";
 
@@ -10,10 +12,102 @@ let
   preferredTimeStr = "%H:%M:%S";
   preferredDateStr = "%A %B %d";
   preferredStrftime = "${preferredDateStr} ${preferredTimeStr} (%Z) %Y";
+
+  inherit (lib) mkEnableOption mkOption mkIf types;
 in
 {
-  config = {
-    specialisation = {
+  options.sierras = {
+    enable = mkEnableOption "Enable Sierras";
+
+    hostName = mkOption {
+      type = types.str;
+      description = ''
+        The networking hostName for this machine. 
+
+        https://en.wikipedia.org/wiki/List_of_mountain_peaks_of_California
+      '';
+      example = "kearsarge";
+    };
+
+    primaryDisplayOutput = mkOption {
+      type = types.str;
+      description = ''
+        Primary output display name, used for sway and waybar configurations.
+        You would grab this configuration with `swaymsg -t get_outputs` once you've launched sway.
+      '';
+      default = "DP-1";
+      example = "HDMI-A-4";
+    };
+
+    primaryDisplayModeString = mkOption {
+      type = types.str;
+      description = ''
+        Resolution and update framerate configuration string used for sway.
+      '';
+
+      # This is for a DELL S3422DW 5PYVZL3
+      default = "3440x1440@59.973Hz";
+    };
+
+    nvidiaProprietaryChaos = mkOption {
+      type = types.bool;
+      description = ''
+        Enable Nvidia proprietary drivers, enables the use of CUDA libs. Note that this is considered
+        highly sketchy on Wayland - symptoms may include flickering, significant power usage, and sudden death. 
+      '';
+      default = false;
+    };
+
+    cudaDev = mkOption {
+      type = types.bool;
+      description = ''
+        Adds the cuda-maintainers cachix instance as a substituter to avoid some massive builds.
+      '';
+      default = false;
+    };
+
+    includeDockerSpecialisation = mkOption {
+      type = types.bool;
+      description = ''
+        Enable a NixOS "specialisation" (spelt the Euro way) which enables docker. This muddies up the GRUB
+        menu with the specialisation for each NixOS generation but it means docker is available always without
+        it screwing with my iptables by default.
+      '';
+      default = false;
+    };
+
+    location = {
+      timeZone = mkOption {
+        type = types.str;
+        description = ''
+          Default timezone for this system. Here's the tz database timezone names:
+          https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+        '';
+        default = "Europe/London";
+      };
+
+      latitude = mkOption {
+        type = types.float ;
+        description = ''
+          Rough latitude for gammastep redshifting manual configuration.
+        '';
+        default = 51.501;
+      };
+
+      longitude = mkOption {
+        type = types.float;
+        description = ''
+          Rough longitude for gammastep redshifting manual configuration.
+        '';
+        default = -0.142;
+      };
+    };
+  };
+
+  config = mkIf cfg.enable {
+    networking.hostName = cfg.hostName;
+
+    specialisation = mkIf cfg.includeDockerSpecialisation {
       # Docker tends to get in my way, leaving processes running and screwing with my
       # iptables in ways that are hard to understand, so we'll just provide it as a specialisation
       # to hop into when I need it.
@@ -42,8 +136,7 @@ in
     # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
     networking.networkmanager.enable = true;
 
-    # Set your time zone.
-    time.timeZone = "Europe/London";
+    time.timeZone = cfg.location.timeZone;
 
     # TODO (tff): I dont think this is working
     # Make the sudo password validity timeout a bit longer
@@ -351,9 +444,8 @@ in
               modifier = mod;
               terminal = "alacritty";
               output = {
-                "DP-1" = {
-                  # Why is it not 60Hz even? So weird...
-                  mode = "3440x1440@59.973Hz";
+                "${cfg.primaryDisplayOutput}" = {
+                  mode = "${cfg.primaryDisplayModeString}";
                   bg = "~/${wallpaperFile} fill";
                 };
               };
@@ -568,7 +660,7 @@ in
               height = 25;
               reload_style_on_change = true;
               output = [
-                "DP-1"
+                "${cfg.primaryDisplayOutput}"
               ];
 
               # TODO: music player daemon? at least get volume levels in here
@@ -657,16 +749,12 @@ in
         services.gammastep = {
           enable = true;
           provider = "manual";
-
-          # Could hook this up with a top-level mapping including the timezone.
-          latitude = 51.501083;
-          longitude = -0.142352;
+          latitude = cfg.location.latitude;
+          longitude = cfg.location.longitude;
           temperature = {
             day = 6500;
             night = 3700;
           };
-
-          # TODO: get this working with waybar.
           tray = true;
         };
 
@@ -751,6 +839,7 @@ in
       i2c-tools
       psmisc
       usbutils
+      pciutils # lspci
       libgpiod
       tree
       ethtool
@@ -809,18 +898,20 @@ in
     # Or disable the firewall altogether.
     # networking.firewall.enable = false;
 
-    # system.stateVersion will be set on a per-machine basis to account for different
-    # install times.
-    # 
-    # This value determines the NixOS release from which the default
-    # settings for stateful data, like file locations and database versions
-    # on your system were taken. It‘s perfectly fine and recommended to leave
-    # this value at the release version of the first install of this system.
-    # Before changing this value read the documentation for this option
-    # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-    # system.stateVersion = "22.11"; # Did you read the comment?
+    # These affect the system settings, /etc/nix/nix.conf, note there can still be user-specific
+    # overrides in ~/.config/nix/nix.conf.
+    nix.settings = {
+      trusted-users = [ "root" "trey" "@wheel" ];
+      experimental-features = [ "nix-command" "flakes" ];
+      
+      substituters = lib.optionals cfg.cudaDev [
+        "https://cuda-maintainers.cachix.org"
+      ];
 
-    nix.settings.experimental-features = [ "nix-command" "flakes" ];
+      trusted-public-keys = lib.optionals cfg.cudaDev [
+        "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+      ];
+    };
   };
 }
 
