@@ -49,21 +49,23 @@ in
       default = "3440x1440@59.973Hz";
     };
 
-    nvidiaProprietaryChaos = mkOption {
-      type = types.bool;
-      description = ''
-        Enable Nvidia proprietary drivers, enables the use of CUDA libs. Note that this is considered
-        highly sketchy on Wayland - symptoms may include flickering, significant power usage, and sudden death. 
-      '';
-      default = false;
-    };
+    nvidia = {
+      proprietaryChaos = mkOption {
+        type = types.bool;
+        description = ''
+          Enable Nvidia proprietary drivers, enables the use of CUDA libs. Note that this is considered
+          highly sketchy on Wayland - symptoms may include flickering, significant power usage, and sudden death. 
+        '';
+        default = false;
+      };
 
-    cudaDev = mkOption {
-      type = types.bool;
-      description = ''
-        Adds the cuda-maintainers cachix instance as a substituter to avoid some massive builds.
-      '';
-      default = false;
+      cudaDev = mkOption {
+        type = types.bool;
+        description = ''
+          Adds the cuda-maintainers cachix instance as a substituter to avoid some massive builds.
+        '';
+        default = false;
+      };
     };
 
     includeDockerSpecialisation = mkOption {
@@ -159,26 +161,9 @@ in
     # networking.proxy.default = "http://user:password@proxy:port/";
     # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-    # Select internationalisation properties.
-    # i18n.defaultLocale = "en_US.UTF-8";
-    # console = {
-    #   font = "Lat2-Terminus16";
-    #   keyMap = "us";
-    # };
-
-    # # Swapping to sway - TODO: through home-manager
-    # programs.sway = {
-    #   enable = true;
-    #   wrapperFeatures.gtk = true;
-    # };
-
     # Wayland requires policykit and OpenGL
     security.polkit.enable = true;
     hardware.opengl.enable = true;
-
-    # Nvidia GPU go brrrrrr
-    # services.xserver.videoDrivers = [ "nvidia" ];
-    # hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
 
     # Enable CUPS to print documents.
     services.printing.enable = true;
@@ -220,7 +205,7 @@ in
         [ "networkmanager" ];
     };
 
-    # TODO (tff): figure out a good place to put this...
+    # TODO (tff): probably move this to home-manager?
     systemd.tmpfiles.rules = [
       # This is where my screenshots go
       "d /home/trey/screenshots - trey users - -"
@@ -903,14 +888,6 @@ in
     nix.settings = {
       trusted-users = [ "root" "trey" "@wheel" ];
       experimental-features = [ "nix-command" "flakes" ];
-      
-      substituters = lib.optionals cfg.cudaDev [
-        "https://cuda-maintainers.cachix.org"
-      ];
-
-      trusted-public-keys = lib.optionals cfg.cudaDev [
-        "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
-      ];
     };
   };
 }

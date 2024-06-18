@@ -18,7 +18,7 @@ in {
 
     system.stateVersion = "22.11"; # Did you read the comment?
 
-    # TODO (tff): make this determined on 
+    # TODO (tff): make a module for laptops, sort out the cpuFreqGovernor based on those options.
     powerManagement.cpuFreqGovernor = "performance";
 
     # TODO (tff): definitely need to check out Pipewire instead...
@@ -44,17 +44,6 @@ in {
     # networking.useDHCP = false;
     # networking.interfaces.enp59s0.useDHCP = true;
     # networking.interfaces.wlo1.useDHCP = true;
-
-    # Enable the X11 windowing system.
-    # services.xserver.videoDrivers = [ "nvidia" ]; 
-
-    # Nvidia GPU go brrrrrr
-    # hardware.opengl.enable = true;
-    # hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
-
-    # environment.systemPackages = with pkgs; [
-    #   google-chrome
-    # ];
   };
 }
 

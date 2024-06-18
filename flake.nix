@@ -40,6 +40,7 @@
         imports = [
           home-manager.nixosModules.home-manager
           ./base.nix
+          ./nvidia.nix
         ];
 
         # final and prev, a.k.a. "self" and "super" respectively. This overlay
