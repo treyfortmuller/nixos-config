@@ -857,6 +857,9 @@ in
       nethogs
       brightnessctl
       wlogout
+
+      # For checking on processes using XWayland
+      xorg.xlsclients
     ];
 
     # TODO: find of bored of jetbrains-mono, need something new
