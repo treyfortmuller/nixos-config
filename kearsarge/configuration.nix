@@ -11,9 +11,9 @@ in {
       hostName = "kearsarge";
       primaryDisplayOutput = "DP-1";
       primaryDisplayModeString = "3440x1440@59.973Hz";
-      nvidiaProprietaryChaos = false;
-      cudaDev = false;
       includeDockerSpecialisation = false;
+      nvidia.proprietaryChaos = false;
+      nvidia.cudaDev = false;
     };
 
     system.stateVersion = "22.11"; # Did you read the comment?

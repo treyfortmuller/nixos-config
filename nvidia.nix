@@ -5,7 +5,7 @@ let
   cfg = config.sierras.nvidia;
 in
 {
-  config = mkIf cfg.proprietaryChaos {
+  config = lib.mkIf cfg.proprietaryChaos {
     # Crimes against humanity to get Wayland to behave on Nvidia proprietary drivers so we can still do
     # CUDA dev... apparently this can dramatically increase power usage.
     services.xserver.videoDrivers = [ "nvidia" ];
