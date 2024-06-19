@@ -12,8 +12,8 @@ in {
       primaryDisplayOutput = "DP-1";
       primaryDisplayModeString = "3440x1440@59.973Hz";
       includeDockerSpecialisation = false;
-      nvidia.proprietaryChaos = false;
-      nvidia.cudaDev = false;
+      nvidia.proprietaryChaos = true;
+      nvidia.cudaDev = true;
     };
 
     system.stateVersion = "22.11"; # Did you read the comment?
@@ -46,4 +46,3 @@ in {
     # networking.interfaces.wlo1.useDHCP = true;
   };
 }
-
