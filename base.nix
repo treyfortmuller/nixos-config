@@ -198,11 +198,35 @@ in
     # services.xserver.libinput.enable = true;
 
     # Define a user account. Don't forget to set a password with ‘passwd’.
-    users.users.trey = {
-      isNormalUser = true;
-      extraGroups = [ "wheel" "dialout" "audio" ]
-        ++ lib.optionals config.networking.networkmanager.enable
-        [ "networkmanager" ];
+    users.users = {
+      trey = {
+        isNormalUser = true;
+        extraGroups = [ "wheel" "dialout" "audio" ]
+          ++ lib.optionals config.networking.networkmanager.enable
+          [ "networkmanager" ];
+      };
+    };
+
+    # Only added when building a VM with build-vm, this is basically a specialisation as far as I can tell.
+    virtualisation.vmVariant = {
+      # https://nixos.wiki/wiki/NixOS:nixos-rebuild_build-vm
+      # TODO (tff): could add a virtualization module and factor this out, the flake way of running this against
+      # the local checkout of nixpkgs would be:
+      # nixos-rebuild build-vm --override-input nixpkgs /home/trey/sources/nixpkgs --flake .#
+      # 
+      # For testing VMs via 'nixos-rebuild build-vm'
+      nixosvmtest = {
+        isSystemUser = true;
+        initialPassword = "test";
+        group = "nixosvmtest";
+      };
+
+      users.groups.nixosvmtest = { };
+      
+      virtualisation = {
+        memorySize =  2048; # Use 2048MiB memory.
+        cores = 3;         
+      };
     };
 
     # TODO (tff): probably move this to home-manager?
@@ -389,7 +413,7 @@ in
             eamodio.gitlens
             zxh404.vscode-proto3
             tamasfe.even-better-toml
-            matklad.rust-analyzer
+            rust-lang.rust-analyzer
             arrterian.nix-env-selector
             streetsidesoftware.code-spell-checker
           ];
@@ -780,7 +804,7 @@ in
       # TODO (tff): what should my strat be here?
       # chromium
       google-chrome
-      spotify-tui
+      # spotify-tui
       slack
       qgroundcontrol
       signal-desktop
