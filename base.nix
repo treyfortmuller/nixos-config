@@ -207,18 +207,24 @@ in
       };
     };
 
+    # TODO (tff): could add a virtualization module and factor this out, 
+    # https://nixos.wiki/wiki/NixOS:nixos-rebuild_build-vm
+    # 
     # Only added when building a VM with build-vm, this is basically a specialisation as far as I can tell.
     virtualisation.vmVariant = {
-      # https://nixos.wiki/wiki/NixOS:nixos-rebuild_build-vm
-      # TODO (tff): could add a virtualization module and factor this out, the flake way of running this against
-      # the local checkout of nixpkgs would be:
+      # the flake way of running this against the local checkout of nixpkgs would be:
       # nixos-rebuild build-vm --override-input nixpkgs /home/trey/sources/nixpkgs --flake .#
       # 
       # For testing VMs via 'nixos-rebuild build-vm'
-      nixosvmtest = {
+      users.users.nixosvmtest = {
         isSystemUser = true;
-        initialPassword = "test";
+        initialHashedPassword = "$y$j9T$hI1mt7owhTIAMIWDChCPx.$bzOYaXaKO7B7kSewE2o88iyxVhFqb38aHz2OuZmcUS8";
         group = "nixosvmtest";
+        
+        # I prefix the qemu launch script with this to port forward SSH so I can
+        # hop onto the VM machine, I wonder if there's a declarative way to do this.
+        # QEMU_NET_OPTS="hostfwd=tcp::2222-:22"
+        useDefaultShell = true;
       };
 
       users.groups.nixosvmtest = { };

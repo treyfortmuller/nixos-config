@@ -1,1 +1,4 @@
 result
+
+# QEMU VM statefulness
+*.qcow2
