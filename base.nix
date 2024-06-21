@@ -539,6 +539,12 @@ in
                 };
               };
             };
+
+            # Eliminate titlebars
+            extraConfig = ''
+              default_border pixel 3
+              default_floating_border pixel 3
+            '';
         };
 
         programs.rofi = {
