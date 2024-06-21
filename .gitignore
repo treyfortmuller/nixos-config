@@ -1,1 +1,4 @@
 result
+
+# nixos-rebuild build-vm Qemu cache
+*.qcow2
