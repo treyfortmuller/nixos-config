@@ -2,13 +2,13 @@
   description = "The missile knows where it is.";
 
   inputs = {
-    # NixOS official package source, using the nixos-23.11 branch here
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    # NixOS official package source, using the nixos-24.05 branch here
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
 
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     home-manager = {
-      url = "github:nix-community/home-manager?ref=release-23.11";
+      url = "github:nix-community/home-manager?ref=release-24.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -30,8 +30,17 @@
         specialArgs = { inherit inputs; };
       };
 
+      ritter = nixpkgs.lib.nixosSystem {
+	system = "x86_64-linux";
+	modules = [
+	  self.nixosModules.default
+	  ./ritter/configuration.nix
+
+	];
+        specialArgs = { inherit inputs; };
+      };
+
       # TODO... add the 2002 Nuc
-      # TODO... add the X1 Carbon laptop
     };
 
     nixosModules = {

@@ -85,7 +85,7 @@ in
           Default timezone for this system. Here's the tz database timezone names:
           https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
         '';
-        default = "Europe/London";
+        default = "America/Los_Angeles";
       };
 
       latitude = mkOption {
@@ -220,11 +220,11 @@ in
       {
         home.stateVersion = config.system.stateVersion;
 
-        home.file = {
-          "${wallpaperFile}" = {
-            source = ./wallpapers/monolith.jpg;
-          };
-        };
+        # home.file = {
+        #  "${wallpaperFile}" = {
+       #     source = ./wallpapers/monolith.jpg;
+      #    };
+     #   };
 
         # I seem to need both of these configs to allow unfree packages to be installed
         # system-wide as well as via e.g. nix-shell invocations.
@@ -431,7 +431,7 @@ in
               output = {
                 "${cfg.primaryDisplayOutput}" = {
                   mode = "${cfg.primaryDisplayModeString}";
-                  bg = "~/${wallpaperFile} fill";
+                  # bg = "~/${wallpaperFile} fill";
                 };
               };
 
@@ -786,7 +786,6 @@ in
       # TODO (tff): what should my strat be here?
       # chromium
       google-chrome
-      spotify-tui
       slack
       qgroundcontrol
       signal-desktop
