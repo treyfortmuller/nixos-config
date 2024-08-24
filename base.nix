@@ -1,6 +1,6 @@
 # Base configuration shared across all machines.
 
-{ config, pkgs, lib, inputs, outputs, ... }:
+{ config, pkgs, lib, inputs, outputs, self, ... }:
 let
   cfg = config.sierras;
 
@@ -93,7 +93,8 @@ in
         description = ''
           Rough latitude for gammastep redshifting manual configuration.
         '';
-        default = 51.501;
+        # TODO (tff): tie this into the location selection so I only have to pick the timeZone
+        default = 33.0;
       };
 
       longitude = mkOption {
@@ -101,7 +102,7 @@ in
         description = ''
           Rough longitude for gammastep redshifting manual configuration.
         '';
-        default = -0.142;
+        default = -117.0;
       };
     };
   };
@@ -205,11 +206,16 @@ in
         [ "networkmanager" ];
     };
 
-    # TODO (tff): probably move this to home-manager?
+    # TODO (tff): probably move this to home-manager? config.home-manager.users.trey.home.homeDirectory
     systemd.tmpfiles.rules = [
       # This is where my screenshots go
       "d /home/trey/screenshots - trey users - -"
     ];
+
+    environment.etc."wallpaper" = {
+      source = "${self}/wallpapers/monolith.jpg";
+    };
+
 
     # home-manager configuration
     home-manager.useGlobalPkgs = true;
@@ -220,11 +226,11 @@ in
       {
         home.stateVersion = config.system.stateVersion;
 
-        # home.file = {
-        #  "${wallpaperFile}" = {
-       #     source = ./wallpapers/monolith.jpg;
-      #    };
-     #   };
+        home.file = {
+          "${wallpaperFile}" = {
+            source = ./wallpapers/monolith.jpg;
+          };
+        };
 
         # I seem to need both of these configs to allow unfree packages to be installed
         # system-wide as well as via e.g. nix-shell invocations.
@@ -419,6 +425,8 @@ in
 
         wayland.windowManager.sway = {
           enable = true;
+          # We fail to access my wallpaper file if we leave checks on...
+          checkConfig = false;
           # Whether to enable sway-session.target on sway startup. We can use this to autostart waybar, etc.
           systemd.enable = true;
           config =
@@ -431,7 +439,7 @@ in
               output = {
                 "${cfg.primaryDisplayOutput}" = {
                   mode = "${cfg.primaryDisplayModeString}";
-                  # bg = "~/${wallpaperFile} fill";
+                  bg = "/etc/wallpaper fill";
                 };
               };
 
@@ -443,7 +451,8 @@ in
                 style = "Regular";
                 size = 10.0;
               };
-
+              
+              # TODO (tff): add a way scale gaps in and out, or just toggle them on and off.
               gaps.inner = 20;
 
               modes.resize = lib.mkOptionDefault {

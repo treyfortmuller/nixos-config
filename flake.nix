@@ -37,7 +37,7 @@
 	  ./ritter/configuration.nix
 
 	];
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs self;  };
       };
 
       # TODO... add the 2002 Nuc
