@@ -1,6 +1,6 @@
 # Base configuration shared across all machines.
 
-{ config, pkgs, lib, inputs, outputs, self, ... }:
+{ config, pkgs, lib, inputs, outputs, ... }:
 let
   cfg = config.sierras;
 
@@ -213,7 +213,7 @@ in
     ];
 
     environment.etc."wallpaper" = {
-      source = "${self}/wallpapers/monolith.jpg";
+      source = ./wallpapers/monolith.jpg;
     };
 
 
