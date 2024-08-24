@@ -4,8 +4,8 @@
 let
   cfg = config.sierras;
 
-  systemFont = "JetBrains Mono";
-  systemFontBold = "JetBrains Mono SemiBold";
+  systemFont = "JetBrainsMono Nerd Font";
+  systemFontBold = "JetBrainsMono NF SemiBold";
 
   # Preferred datetime format, used throughout the system
   # Sunday June 09 00:58:05 (BST) 2024
@@ -297,7 +297,7 @@ in
             shellAliases =
               let systemPackages = config.environment.systemPackages;
               in {
-                ll = "ls -l -h";
+                ll = "ls -lhtr";
                 csv = "column -s, -t ";
                 jfu = "journalctl -fu";
                 ip = "ip -c";
@@ -876,8 +876,14 @@ in
       xorg.xlsclients
     ];
 
-    # TODO: find of bored of jetbrains-mono, need something new
-    fonts.packages = with pkgs; [ jetbrains-mono ];
+    # For the available nerdfonts check
+    # https://www.nerdfonts.com/font-downloads
+    fonts = {
+      enableDefaultPackages = true;
+      packages = [
+        (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
+      ];
+    };
 
     # Some programs need SUID wrappers, can be configured further or are
     # started in user sessions.
