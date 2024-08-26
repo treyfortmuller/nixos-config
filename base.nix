@@ -785,9 +785,10 @@ in
 
       _1password
 
-      # For fonts on Wayland
-      pango
-      sway-contrib.grimshot
+      pango # For fonts on Wayland 
+      slurp # For screen area selection
+      sway-contrib.grimshot # For screenshots
+      wf-recorder # For screen captured videos
 
       # Thirdparty native
       unstable.zoom-us
