@@ -49,6 +49,8 @@ in
       default = "3440x1440@59.973Hz";
     };
 
+    laptop = mkEnableOption "Enables laptop configuration";
+
     nvidia = {
       proprietaryChaos = mkOption {
         type = types.bool;
@@ -875,6 +877,8 @@ in
 
       # For checking on processes using XWayland
       xorg.xlsclients
+    ] ++ lib.optionals cfg.laptop [
+      acpi
     ];
 
     # For the available nerdfonts check
