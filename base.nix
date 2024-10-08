@@ -474,15 +474,20 @@ in
               };
 
               keybindings = lib.mkOptionDefault {
+                "${mod}+Tab" = "workspace next_on_output";
+                "${mod}+Shift+Tab" = "workspace prev_on_output";
+
                 "${mod}+g" = "gaps inner all toggle ${builtins.toString gapSize}";
                 "${mod}+Escape" = "exec ${pkgs.swaylock-effects}/bin/swaylock";
-                "${mod}+Tab" = "exec rofi -show window";
+                
+                # This is overriding the default stacked and tabbed layouts
+                "${mod}+w" = "exec rofi -show window"; 
                 "${mod}+s" = "exec rofi -show ssh";
+                "${mod}+space" = "exec rofi -show drun";
                 "${mod}+d" = "focus mode_toggle";
 
                 # Sway defaults differ from i3 a tiny bit here
                 "${mod}+Shift+r" = "reload";
-                "${mod}+space" = "exec rofi -show drun";
                 "${mod}+Shift+e" = "exec ${pkgs.wlogout}/bin/wlogout";
 
                 # Screenshots via grimshot, save to screenshots dir
@@ -493,8 +498,7 @@ in
                 "Shift+Print" = "exec grimshot copy area";
                 "${mod}+Shift+Print" = "exec grimshot copy window";
 
-                # Override the default stacked and tabbed layouts
-                "${mod}+w" = "exec rofi -show window"; 
+
                 "${mod}+Shift+f" = "floating toggle";
                 "${mod}+BackSpace" = "split toggle";
 
@@ -664,9 +668,12 @@ in
               position = "bottom";
               height = 25;
               reload_style_on_change = true;
-              output = [
-                "${cfg.primaryDisplayOutput}"
-              ];
+
+              # Hopefully not having an output configures just defaults to outputting on
+              # all displays.
+              # output = [
+              #   "${cfg.primaryDisplayOutput}"
+              # ];
 
               # TODO: music player daemon? at least get volume levels in here
               # Also could get the gammastep config in there.
