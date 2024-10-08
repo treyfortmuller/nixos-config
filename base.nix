@@ -777,6 +777,7 @@ in
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     environment.systemPackages = with pkgs; [
+      wf-recorder
       unstable.nix-search-cli
 
       # Fixes some really bad issues with `nix copy` progress indication compared

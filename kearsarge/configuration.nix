@@ -9,7 +9,7 @@ in {
     sierras = {
       enable = true;
       hostName = "kearsarge";
-      primaryDisplayOutput = "DP-1";
+      primaryDisplayOutput = "HDMI-A-1";
       primaryDisplayModeString = "3440x1440@59.973Hz";
       includeDockerSpecialisation = false;
       nvidia.proprietaryChaos = true;
