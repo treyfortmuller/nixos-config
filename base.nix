@@ -434,6 +434,9 @@ in
           config =
             let
               mod = "Mod4";
+
+              # Default inner gaps, in pixels
+              gapSize= 20;
             in
             {
               modifier = mod;
@@ -453,9 +456,8 @@ in
                 style = "Regular";
                 size = 10.0;
               };
-              
-              # TODO (tff): add a way scale gaps in and out, or just toggle them on and off.
-              gaps.inner = 20;
+
+              gaps.inner = gapSize;
 
               modes.resize = lib.mkOptionDefault {
                 # Return, Esc, or Mod+r again to escape resize mode
@@ -472,6 +474,7 @@ in
               };
 
               keybindings = lib.mkOptionDefault {
+                "${mod}+g" = "gaps inner all toggle ${builtins.toString gapSize}";
                 "${mod}+Escape" = "exec ${pkgs.swaylock-effects}/bin/swaylock";
                 "${mod}+Tab" = "exec rofi -show window";
                 "${mod}+s" = "exec rofi -show ssh";
@@ -490,8 +493,8 @@ in
                 "Shift+Print" = "exec grimshot copy area";
                 "${mod}+Shift+Print" = "exec grimshot copy window";
 
-                # TODO (tff): Disable stacking and tabbed layouts
-                # "${mod}+w" = ""; <- remove this from the attrset defaults
+                # Override the default stacked and tabbed layouts
+                "${mod}+w" = "exec rofi -show window"; 
                 "${mod}+Shift+f" = "floating toggle";
                 "${mod}+BackSpace" = "split toggle";
 
@@ -825,8 +828,7 @@ in
       neofetch
 
       # Dev
-      nixfmt
-      nixpkgs-fmt
+      nixfmt-rfc-style
       gh
       picocom
 
