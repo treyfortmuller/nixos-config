@@ -14,7 +14,7 @@
    primaryDisplayOutput = "eDP-1";
    primaryDisplayModeString = "1920x1080@60.012Hz";
    includeDockerSpecialisation = false;
-
+   laptop = true;
    nvidia.proprietaryChaos = false;
    nvidia.cudaDev = false;
   };

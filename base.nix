@@ -49,6 +49,8 @@ in
       default = "3440x1440@59.973Hz";
     };
 
+    laptop = mkEnableOption "Enables laptop configuration";
+
     nvidia = {
       proprietaryChaos = mkOption {
         type = types.bool;
@@ -786,9 +788,10 @@ in
 
       _1password
 
-      # For fonts on Wayland
-      pango
-      sway-contrib.grimshot
+      pango # For fonts on Wayland 
+      slurp # For screen area selection
+      sway-contrib.grimshot # For screenshots
+      wf-recorder # For screen captured videos
 
       # Thirdparty native
       unstable.zoom-us
@@ -875,6 +878,8 @@ in
 
       # For checking on processes using XWayland
       xorg.xlsclients
+    ] ++ lib.optionals cfg.laptop [
+      acpi
     ];
 
     # For the available nerdfonts check
