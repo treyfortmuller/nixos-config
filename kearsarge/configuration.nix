@@ -21,11 +21,6 @@ in {
     # TODO (tff): make a module for laptops, sort out the cpuFreqGovernor based on those options.
     powerManagement.cpuFreqGovernor = "performance";
 
-    # TODO (tff): definitely need to check out Pipewire instead...
-    # Enable sound.
-    sound.enable = true;
-    hardware.pulseaudio.enable = true;
-
     # Disable the PC speaker "audio card"
     boot.blacklistedKernelModules = [ "snd_pcsp" ];
 

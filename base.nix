@@ -192,10 +192,14 @@ in
       sway
     '';
 
-    # Enable sound.
-    # sound.enable = true;
-    # hardware.pulseaudio.enable = true;
-    # hardware.pulseaudio.support32Bit = true;
+    # Audio setup
+    security.rtkit.enable = true;
+    services.pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+    };
 
     # Enable touchpad support (enabled default in most desktopManager).
     # services.xserver.libinput.enable = true;
@@ -505,13 +509,13 @@ in
                 # TODO (tff): get the volume in waybar!
                 # Volume control
                 "XF86AudioRaiseVolume" =
-                  "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
+                  "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +5%";
                 "XF86AudioLowerVolume" =
-                  "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
+                  "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -5%";
                 "XF86AudioMute" =
-                  "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
+                  "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle";
                 "XF86AudioMicMute" =
-                  "exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle";
+                  "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-source-mute @DEFAULT_SOURCE@ toggle";
 
                 # Brightness control for laptops
                 "XF86MonBrightnessDown" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%-";
@@ -789,6 +793,8 @@ in
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     environment.systemPackages = with pkgs; [
+      pavucontrol
+      pulseaudio
       wf-recorder
       unstable.nix-search-cli
 
