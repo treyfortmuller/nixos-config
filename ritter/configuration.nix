@@ -1,22 +1,29 @@
 # ThinkPad X1 Carbon 6th Gen
 
-{ config, lib, pkgs, self, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  self,
+  ...
+}:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
   sierras = {
-   enable = true;
-   hostName = "ritter";
-   primaryDisplayOutput = "eDP-1";
-   primaryDisplayModeString = "1920x1080@60.012Hz";
-   includeDockerSpecialisation = false;
-   laptop = true;
-   nvidia.proprietaryChaos = false;
-   nvidia.cudaDev = false;
+    enable = true;
+    hostName = "ritter";
+    primaryDisplayOutput = "eDP-1";
+    primaryDisplayModeString = "1920x1080@60.012Hz";
+    includeDockerSpecialisation = false;
+    laptop = true;
+    nvidia.proprietaryChaos = false;
+    nvidia.cudaDev = false;
+    firmwareDev = true;
   };
 
   # Use the systemd-boot EFI boot loader.
@@ -47,9 +54,6 @@
 
   # Enable the X11 windowing system.
   # services.xserver.enable = true;
-
-
-  
 
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
@@ -122,4 +126,3 @@
   system.stateVersion = "24.05"; # Did you read the comment?
 
 }
-

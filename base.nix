@@ -107,6 +107,8 @@ in
         default = -117.0;
       };
     };
+
+    firmwareDev = mkEnableOption "Flight vehicle firmware development";
   };
 
   config = mkIf cfg.enable {
@@ -895,7 +897,16 @@ in
       xorg.xlsclients
     ] ++ lib.optionals cfg.laptop [
       acpi
+    ] ++ lib.optionals cfg.firmwareDev [
+      inav-configurator
+      inav-blackbox-tools
     ];
+
+    services.udev.extraRules = lib.optionalString cfg.firmwareDev ''
+      # STM32 microcontrollers DFU mode
+      SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="0666"
+    '';
+
 
     # For the available nerdfonts check
     # https://www.nerdfonts.com/font-downloads

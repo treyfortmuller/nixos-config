@@ -1,8 +1,14 @@
 # Kearsarge desktop configuration
 
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
-in {
+in
+{
   imports = [ ./hardware-configuration.nix ];
 
   config = {
@@ -14,6 +20,7 @@ in {
       includeDockerSpecialisation = false;
       nvidia.proprietaryChaos = true;
       nvidia.cudaDev = true;
+      firmwareDev = true;
     };
 
     system.stateVersion = "22.11"; # Did you read the comment?
