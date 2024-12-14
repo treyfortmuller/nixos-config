@@ -1,6 +1,13 @@
 # Base configuration shared across all machines.
 
-{ config, pkgs, lib, inputs, outputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  outputs,
+  ...
+}:
 let
   cfg = config.sierras;
 
@@ -13,7 +20,12 @@ let
   preferredDateStr = "%A %B %d";
   preferredStrftime = "${preferredDateStr} ${preferredTimeStr} (%Z) %Y";
 
-  inherit (lib) mkEnableOption mkOption mkIf types;
+  inherit (lib)
+    mkEnableOption
+    mkOption
+    mkIf
+    types
+    ;
 in
 {
   options.sierras = {
@@ -91,7 +103,7 @@ in
       };
 
       latitude = mkOption {
-        type = types.float ;
+        type = types.float;
         description = ''
           Rough latitude for gammastep redshifting manual configuration.
         '';
@@ -209,9 +221,11 @@ in
     # Define a user account. Don't forget to set a password with ‘passwd’.
     users.users.trey = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "dialout" "audio" ]
-        ++ lib.optionals config.networking.networkmanager.enable
-        [ "networkmanager" ];
+      extraGroups = [
+        "wheel"
+        "dialout"
+        "audio"
+      ] ++ lib.optionals config.networking.networkmanager.enable [ "networkmanager" ];
     };
 
     # TODO (tff): probably move this to home-manager? config.home-manager.users.trey.home.homeDirectory
@@ -224,10 +238,10 @@ in
       source = ./wallpapers/monolith.jpg;
     };
 
-
     # home-manager configuration
     home-manager.useGlobalPkgs = true;
-    home-manager.users.trey = { pkgs, ... }:
+    home-manager.users.trey =
+      { pkgs, ... }:
       let
         wallpaperFile = ".wallpaper";
       in
@@ -303,8 +317,10 @@ in
             '';
 
             shellAliases =
-              let systemPackages = config.environment.systemPackages;
-              in {
+              let
+                systemPackages = config.environment.systemPackages;
+              in
+              {
                 ll = "ls -lhtr";
                 csv = "column -s, -t ";
                 jfu = "journalctl -fu";
@@ -312,9 +328,8 @@ in
                 perms = ''stat --format "%a %n"'';
                 nixos-config = "cd ~/sources/nixos-config";
                 diff = "diff -y --color";
-              } // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) {
-                clock = "tty-clock -btc";
-              };
+              }
+              // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) { clock = "tty-clock -btc"; };
           };
 
         programs.fzf = {
@@ -349,9 +364,18 @@ in
           enable = true;
           viAlias = true;
           vimAlias = true;
-          plugins = with pkgs.vimPlugins; [ vim-nix rust-vim ];
+          plugins = with pkgs.vimPlugins; [
+            vim-nix
+            rust-vim
+            telescope-nvim
+            telescope-fzf-native-nvim
+            nvim-treesitter.withAllGrammars
+            plenary-nvim
+          ];
           extraConfig = ''
-            set number
+             set number
+            let mapleader = ','
+            noremap ff <cmd>Telescope find_files<cr>
           '';
         };
 
@@ -361,7 +385,10 @@ in
           userEmail = "tfortmuller@mac.com";
 
           # Globally ignored
-          ignores = [ "*~" "*.swp" ];
+          ignores = [
+            "*~"
+            "*.swp"
+          ];
 
           aliases = {
             # List aliases
@@ -422,9 +449,7 @@ in
 
             "[nix]"."editor.tabSize" = 2;
 
-            "cSpell.enableFiletypes" = [
-              "nix"
-            ];
+            "cSpell.enableFiletypes" = [ "nix" ];
 
             "window.zoomLevel" = -1;
             "editor.rulers" = [ 120 ];
@@ -442,7 +467,7 @@ in
               mod = "Mod4";
 
               # Default inner gaps, in pixels
-              gapSize= 20;
+              gapSize = 20;
             in
             {
               modifier = mod;
@@ -485,9 +510,9 @@ in
 
                 "${mod}+g" = "gaps inner all toggle ${builtins.toString gapSize}";
                 "${mod}+Escape" = "exec ${pkgs.swaylock-effects}/bin/swaylock";
-                
+
                 # This is overriding the default stacked and tabbed layouts
-                "${mod}+w" = "exec rofi -show window"; 
+                "${mod}+w" = "exec rofi -show window";
                 "${mod}+s" = "exec rofi -show ssh";
                 "${mod}+space" = "exec rofi -show drun";
                 "${mod}+d" = "focus mode_toggle";
@@ -504,20 +529,15 @@ in
                 "Shift+Print" = "exec grimshot copy area";
                 "${mod}+Shift+Print" = "exec grimshot copy window";
 
-
                 "${mod}+Shift+f" = "floating toggle";
                 "${mod}+BackSpace" = "split toggle";
 
                 # TODO (tff): get the volume in waybar!
                 # Volume control
-                "XF86AudioRaiseVolume" =
-                  "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +5%";
-                "XF86AudioLowerVolume" =
-                  "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -5%";
-                "XF86AudioMute" =
-                  "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle";
-                "XF86AudioMicMute" =
-                  "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-source-mute @DEFAULT_SOURCE@ toggle";
+                "XF86AudioRaiseVolume" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +5%";
+                "XF86AudioLowerVolume" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -5%";
+                "XF86AudioMute" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle";
+                "XF86AudioMicMute" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-source-mute @DEFAULT_SOURCE@ toggle";
 
                 # Brightness control for laptops
                 "XF86MonBrightnessDown" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%-";
@@ -564,11 +584,11 @@ in
               };
             };
 
-            # Eliminate titlebars
-            extraConfig = ''
-              default_border pixel 3
-              default_floating_border pixel 3
-            '';
+          # Eliminate titlebars
+          extraConfig = ''
+            default_border pixel 3
+            default_floating_border pixel 3
+          '';
         };
 
         programs.rofi = {
@@ -683,7 +703,10 @@ in
 
               # TODO: music player daemon? at least get volume levels in here
               # Also could get the gammastep config in there.
-              modules-left = [ "sway/workspaces" "sway/mode" ];
+              modules-left = [
+                "sway/workspaces"
+                "sway/mode"
+              ];
               modules-center = [ "clock" ];
 
               # TODO: need to add battery and charge state for the laptop
@@ -719,7 +742,6 @@ in
               "memory" = {
                 format = "MEM {used:0.1f}G/{total:0.1f}G";
               };
-
 
               "user" = {
                 format = "UP {work_d} days {work_H}:{work_M}";
@@ -790,131 +812,132 @@ in
 
     # The head of home-manager master has a neovim.defaultEditor option
     # to accomplish this, but its not available in 22.11
-    environment.sessionVariables = rec { EDITOR = "nvim"; };
+    environment.sessionVariables = rec {
+      EDITOR = "nvim";
+    };
 
     # List packages installed in system profile. To search, run:
     # $ nix search wget
-    environment.systemPackages = with pkgs; [
-      pavucontrol
-      pulseaudio
-      wf-recorder
-      unstable.nix-search-cli
+    environment.systemPackages =
+      with pkgs;
+      [
+        pavucontrol
+        pulseaudio
+        wf-recorder
+        unstable.nix-search-cli
 
-      # Fixes some really bad issues with `nix copy` progress indication compared
-      # to nix CLI 2.13.
-      unstable.nixVersions.nix_2_19
+        # Fixes some really bad issues with `nix copy` progress indication compared
+        # to nix CLI 2.13.
+        unstable.nixVersions.nix_2_19
 
-      _1password
+        _1password
 
-      pango # For fonts on Wayland 
-      slurp # For screen area selection
-      sway-contrib.grimshot # For screenshots
-      wf-recorder # For screen captured videos
+        pango # For fonts on Wayland
+        slurp # For screen area selection
+        sway-contrib.grimshot # For screenshots
+        wf-recorder # For screen captured videos
 
-      # Thirdparty native
-      unstable.zoom-us
+        # Thirdparty native
+        unstable.zoom-us
 
-      # TODO (tff): what should my strat be here?
-      # chromium
-      google-chrome
-      slack
-      qgroundcontrol
-      signal-desktop
+        # TODO (tff): what should my strat be here?
+        # chromium
+        google-chrome
+        slack
+        qgroundcontrol
+        signal-desktop
 
-      # Media
-      vlc
-      ffmpeg
-      imagemagick
+        # Media
+        vlc
+        ffmpeg
+        imagemagick
 
-      # TODO: replace with something wayland compatible
-      # simplescreenrecorder
-      meshlab
-      ffmpeg-full
+        # TODO: replace with something wayland compatible
+        # simplescreenrecorder
+        meshlab
+        ffmpeg-full
 
-      # PDF
-      evince
-      okular
+        # PDF
+        evince
+        okular
 
-      # Some nonsense and shenanigans
-      figlet
-      cmatrix
-      tty-clock
-      cbonsai
-      neofetch
+        # Some nonsense and shenanigans
+        figlet
+        cmatrix
+        tty-clock
+        cbonsai
+        neofetch
 
-      # Dev
-      nixfmt-rfc-style
-      gh
-      picocom
+        # Dev
+        nixfmt-rfc-style
+        gh
+        picocom
 
-      # Yubikey management
-      yubikey-manager
-      yubikey-manager-qt
+        # Yubikey management
+        yubikey-manager
+        yubikey-manager-qt
 
-      # Tools
-      wget
-      ack
-      wl-clipboard
-      fzf
-      i2c-tools
-      psmisc
-      usbutils
-      pciutils # lspci
-      libgpiod
-      tree
-      ethtool
-      grpcurl
-      tmux
-      htop
-      jq
-      mosh
-      fzf
-      bat
-      ranger
-      awscli2
-      cntr
-      ripgrep
-      lsof
-      lshw
-      unzip
-      tcpdump
-      arp-scan
-      cryptsetup
-      wireshark
-      wireshark-cli
-      nix-tree
-      nix-diff
-      socat
-      remmina
-      feh
-      git-lfs
-      sshping
-      nethogs
-      brightnessctl
-      wlogout
+        # Tools
+        wget
+        ack
+        wl-clipboard
+        fzf
+        i2c-tools
+        psmisc
+        usbutils
+        pciutils # lspci
+        libgpiod
+        tree
+        ethtool
+        grpcurl
+        tmux
+        htop
+        jq
+        mosh
+        fzf
+        bat
+        ranger
+        awscli2
+        cntr
+        ripgrep
+        lsof
+        lshw
+        unzip
+        tcpdump
+        arp-scan
+        cryptsetup
+        wireshark
+        wireshark-cli
+        nix-tree
+        nix-diff
+        socat
+        remmina
+        feh
+        git-lfs
+        sshping
+        nethogs
+        brightnessctl
+        wlogout
 
-      # For checking on processes using XWayland
-      xorg.xlsclients
-    ] ++ lib.optionals cfg.laptop [
-      acpi
-    ] ++ lib.optionals cfg.firmwareDev [
-      inav-configurator
-      inav-blackbox-tools
-    ];
+        # For checking on processes using XWayland
+        xorg.xlsclients
+      ]
+      ++ lib.optionals cfg.laptop [ acpi ]
+      ++ lib.optionals cfg.firmwareDev [
+        inav-configurator
+        inav-blackbox-tools
+      ];
 
     services.udev.extraRules = lib.optionalString cfg.firmwareDev ''
       # STM32 microcontrollers DFU mode
       SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="0666"
     '';
 
-
     # For the available nerdfonts check
     # https://www.nerdfonts.com/font-downloads
     fonts = {
       enableDefaultPackages = true;
-      packages = [
-        (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
-      ];
+      packages = [ (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; }) ];
     };
 
     # Some programs need SUID wrappers, can be configured further or are
@@ -941,9 +964,15 @@ in
     # These affect the system settings, /etc/nix/nix.conf, note there can still be user-specific
     # overrides in ~/.config/nix/nix.conf.
     nix.settings = {
-      trusted-users = [ "root" "trey" "@wheel" ];
-      experimental-features = [ "nix-command" "flakes" ];
+      trusted-users = [
+        "root"
+        "trey"
+        "@wheel"
+      ];
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
     };
   };
 }
-

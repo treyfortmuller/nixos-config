@@ -18,56 +18,71 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, nixpkgs-wayland, ... }@inputs: {
-    nixosConfigurations = {
-      # Custom desktop build, NZXT case
-      kearsarge = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          self.nixosModules.default
-          ./kearsarge/configuration.nix
-        ];
-        specialArgs = { inherit inputs; };
+  outputs =
+    {
+      self,
+      nixpkgs,
+      nixpkgs-unstable,
+      home-manager,
+      nixpkgs-wayland,
+      ...
+    }@inputs:
+    {
+      nixosConfigurations = {
+        # Custom desktop build, NZXT case
+        kearsarge = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            self.nixosModules.default
+            ./kearsarge/configuration.nix
+          ];
+          specialArgs = {
+            inherit inputs;
+          };
+        };
+
+        ritter = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            self.nixosModules.default
+            ./ritter/configuration.nix
+
+          ];
+          specialArgs = {
+            inherit inputs self;
+          };
+        };
+
+        # TODO... add the 2002 Nuc
       };
 
-      ritter = nixpkgs.lib.nixosSystem {
-	system = "x86_64-linux";
-	modules = [
-	  self.nixosModules.default
-	  ./ritter/configuration.nix
+      nixosModules = {
+        # The base configuration to be depended on by privately-managed machines
+        default =
+          { ... }:
+          {
+            imports = [
+              home-manager.nixosModules.home-manager
+              ./base.nix
+              ./nvidia.nix
+            ];
 
-	];
-        specialArgs = { inherit inputs self;  };
+            # final and prev, a.k.a. "self" and "super" respectively. This overlay
+            # makes 'pkgs.unstable' available.
+            nixpkgs.overlays = [
+              (final: prev: {
+                unstable = import nixpkgs-unstable {
+                  system = final.system;
+                  config.allowUnfree = true;
+                };
+              })
+
+              # TODO: anything good in here?
+              # nixpkgs-wayland.overlay
+            ];
+          };
       };
 
-      # TODO... add the 2002 Nuc
+      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
     };
-
-    nixosModules = {
-      # The base configuration to be depended on by privately-managed machines
-      default = { ... }: {
-        imports = [
-          home-manager.nixosModules.home-manager
-          ./base.nix
-          ./nvidia.nix
-        ];
-
-        # final and prev, a.k.a. "self" and "super" respectively. This overlay
-        # makes 'pkgs.unstable' available.
-        nixpkgs.overlays = [
-          (final: prev: {
-            unstable = import nixpkgs-unstable {
-              system = final.system;
-              config.allowUnfree = true;
-            };
-          })
-
-          # TODO: anything good in here?
-          # nixpkgs-wayland.overlay
-        ];
-      };
-    };
-
-    formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
-  };
 }
