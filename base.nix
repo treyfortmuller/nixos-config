@@ -430,7 +430,7 @@ in
             eamodio.gitlens
             zxh404.vscode-proto3
             tamasfe.even-better-toml
-            matklad.rust-analyzer
+            rust-lang.rust-analyzer
             arrterian.nix-env-selector
             streetsidesoftware.code-spell-checker
           ];
@@ -821,6 +821,7 @@ in
     environment.systemPackages =
       with pkgs;
       [
+        libheif
         pavucontrol
         pulseaudio
         wf-recorder
