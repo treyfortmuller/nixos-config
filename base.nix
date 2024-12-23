@@ -522,8 +522,10 @@ in
                 "${mod}+Shift+e" = "exec ${pkgs.wlogout}/bin/wlogout";
 
                 # Screenshots via grimshot, save to screenshots dir
-                "Print" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area ~/screenshots/$(date --iso-8601=seconds).png";
-                "${mod}+Print" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save window ~/screenshots/$(date --iso-8601=seconds).png";
+                "Print" =
+                  "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area ~/screenshots/$(date --iso-8601=seconds).png";
+                "${mod}+Print" =
+                  "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save window ~/screenshots/$(date --iso-8601=seconds).png";
 
                 # Copy to the clipboard and don't save
                 "Shift+Print" = "exec grimshot copy area";
@@ -534,10 +536,14 @@ in
 
                 # TODO (tff): get the volume in waybar!
                 # Volume control
-                "XF86AudioRaiseVolume" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +5%";
-                "XF86AudioLowerVolume" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -5%";
-                "XF86AudioMute" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle";
-                "XF86AudioMicMute" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-source-mute @DEFAULT_SOURCE@ toggle";
+                "XF86AudioRaiseVolume" =
+                  "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +5%";
+                "XF86AudioLowerVolume" =
+                  "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -5%";
+                "XF86AudioMute" =
+                  "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle";
+                "XF86AudioMicMute" =
+                  "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-source-mute @DEFAULT_SOURCE@ toggle";
 
                 # Brightness control for laptops
                 "XF86MonBrightnessDown" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%-";
@@ -645,7 +651,7 @@ in
               border-bottom: 3px solid white;
             }
 
-            #mode, #network, #cpu, #temperature, #memory  {
+            #mode, #network, #battery, #cpu, #temperature, #memory  {
               padding-right: 15px;
               padding-left: 15px;
               border-right: 1px solid white;
@@ -661,31 +667,11 @@ in
               border-bottom: 3px solid white;
             }
 
-            #battery {
-              background-color: #ffffff;
-              color: black;
-            }
-
-            #battery.charging {
-              color: white;
-              background-color: #26A65B;
-            }
-
             @keyframes blink {
               to {
                 background-color: #ffffff;
                 color: black;
               }
-            }
-
-            #battery.warning:not(.charging) {
-              background: #f53c3c;
-              color: white;
-              animation-name: blink;
-              animation-duration: 0.5s;
-              animation-timing-function: steps(12);
-              animation-iteration-count: infinite;
-              animation-direction: alternate;
             }
           '';
           settings = {
@@ -714,6 +700,7 @@ in
               modules-right = [
                 # TODO: this one is complicated, come back to it.
                 # "network"
+                "battery"
                 "cpu"
                 "temperature"
                 "memory"
@@ -729,6 +716,10 @@ in
               "clock" = {
                 interval = 5;
                 format = "{:${preferredStrftime}}";
+              };
+
+              "battery" = {
+                format = "BATT {capacity}%";
               };
 
               "cpu" = {
@@ -821,6 +812,7 @@ in
     environment.systemPackages =
       with pkgs;
       [
+        spotify
         libheif
         pavucontrol
         pulseaudio
