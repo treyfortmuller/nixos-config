@@ -24,6 +24,7 @@
     nvidia.proprietaryChaos = false;
     nvidia.cudaDev = false;
     firmwareDev = true;
+    bluetooth = true;
   };
 
   # Use the systemd-boot EFI boot loader.

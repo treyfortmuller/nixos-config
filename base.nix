@@ -121,6 +121,8 @@ in
     };
 
     firmwareDev = mkEnableOption "Flight vehicle firmware development";
+
+    bluetooth = mkEnableOption "Enable bluetooth hardware and userspace services";
   };
 
   config = mkIf cfg.enable {
@@ -181,6 +183,13 @@ in
     # Wayland requires policykit and OpenGL
     security.polkit.enable = true;
     hardware.opengl.enable = true;
+
+    hardware.bluetooth= {
+      enable = cfg.bluetooth;
+      powerOnBoot = true;
+    };
+
+    services.blueman.enable = cfg.bluetooth;
 
     # Enable CUPS to print documents.
     services.printing.enable = true;
@@ -328,6 +337,7 @@ in
                 perms = ''stat --format "%a %n"'';
                 nixos-config = "cd ~/sources/nixos-config";
                 diff = "diff -y --color";
+                heic-convert = "for file in *.HEIC; do heif-dec $file \${file/%.HEIC/.jpg}; done";
               }
               // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) { clock = "tty-clock -btc"; };
           };
