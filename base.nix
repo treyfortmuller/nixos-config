@@ -184,7 +184,7 @@ in
     security.polkit.enable = true;
     hardware.opengl.enable = true;
 
-    hardware.bluetooth= {
+    hardware.bluetooth = {
       enable = cfg.bluetooth;
       powerOnBoot = true;
     };
