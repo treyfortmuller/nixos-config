@@ -192,7 +192,10 @@ in
 
     # Wayland requires policykit and OpenGL
     security.polkit.enable = true;
-    hardware.opengl.enable = true;
+    hardware.graphics = {
+      enable = true;
+      enable32Bit = true;
+    };
 
     hardware.bluetooth = {
       enable = cfg.bluetooth;

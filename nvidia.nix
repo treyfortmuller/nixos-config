@@ -17,13 +17,13 @@ in
     # CUDA dev... apparently this can dramatically increase power usage.
     services.xserver.videoDrivers = [ "nvidia" ];
 
-    hardware.opengl = {
+    hardware.graphics = {
       enable = true;
-      driSupport = true;
-      driSupport32Bit = true;
+      enable32Bit = true;
     };
 
     hardware.nvidia = {
+      open = false;
       package = config.boot.kernelPackages.nvidiaPackages.stable;
 
       # Unclear exactly what this does...
