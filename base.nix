@@ -138,6 +138,16 @@ in
       };
     };
 
+    # OBS Studio virtual camera setup - move this to a separate module at some point
+    boot.extraModulePackages = with config.boot.kernelPackages; [
+      v4l2loopback
+    ];
+    boot.kernelModules = [ "v4l2loopback" ];
+    boot.extraModprobeConfig = ''
+      options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
+    '';
+    # security.polkit.enable = true; # included elsewhere...
+
     # Use the systemd-boot EFI boot loader.
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
@@ -256,6 +266,13 @@ in
       in
       {
         home.stateVersion = config.system.stateVersion;
+
+        programs.obs-studio = {
+          enable = true;
+          plugins = with pkgs.obs-studio-plugins; [
+            wlrobs
+          ];
+        };
 
         home.file = {
           "${wallpaperFile}" = {
@@ -822,6 +839,7 @@ in
     environment.systemPackages =
       with pkgs;
       [
+        gedit
         spotify
         libheif
         pavucontrol
