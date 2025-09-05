@@ -93,15 +93,6 @@ in
     };
 
     location = {
-      timeZone = mkOption {
-        type = types.str;
-        description = ''
-          Default timezone for this system. Here's the tz database timezone names:
-          https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-        '';
-        default = "America/Los_Angeles";
-      };
-
       latitude = mkOption {
         type = types.float;
         description = ''
@@ -167,7 +158,9 @@ in
     # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
     networking.networkmanager.enable = true;
 
-    time.timeZone = cfg.location.timeZone;
+    # If null, the timezone will default to UTC and can be set imperatively
+    # using timedatectl.
+    time.timeZone = null;
 
     # TODO (tff): I dont think this is working
     # Make the sudo password validity timeout a bit longer
@@ -842,6 +835,8 @@ in
     environment.systemPackages =
       with pkgs;
       [
+        gparted
+        xournalpp
         gedit
         spotify
         libheif
