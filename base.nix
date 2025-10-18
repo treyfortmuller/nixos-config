@@ -835,6 +835,7 @@ in
     environment.systemPackages =
       with pkgs;
       [
+        ookla-speedtest
         gparted
         xournalpp
         gedit
