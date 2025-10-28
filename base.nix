@@ -835,6 +835,7 @@ in
     environment.systemPackages =
       with pkgs;
       [
+        bambu-studio
         ookla-speedtest
         gparted
         xournalpp
@@ -846,9 +847,8 @@ in
         wf-recorder
         unstable.nix-search-cli
 
-        # Fixes some really bad issues with `nix copy` progress indication compared
-        # to nix CLI 2.13.
-        unstable.nixVersions.nix_2_19
+        # Be aggressive on new nix CLI features
+        unstable.nixVersions.nix_2_31
 
         _1password
 
@@ -865,7 +865,7 @@ in
         google-chrome
         slack
         qgroundcontrol
-        signal-desktop
+        unstable.signal-desktop
 
         # Media
         vlc

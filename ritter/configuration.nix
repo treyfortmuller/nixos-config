@@ -25,8 +25,8 @@
     nvidia.cudaDev = false;
     firmwareDev = true;
     bluetooth = true;
-    location.latitude = 51.507;
-    location.longitude = -0.118;
+    location.latitude = 33.657;
+    location.longitude = -117.787;
   };
 
   # Use the systemd-boot EFI boot loader.
