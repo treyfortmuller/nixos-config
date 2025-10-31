@@ -951,16 +951,20 @@ in
     services.udev.extraRules = lib.optionalString cfg.firmwareDev ''
       # STM32 microcontrollers DFU mode
       SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="0666"
-
-      # Use OpenOCD with the micro:bit v2 discovery board, see:
-      # https://doc.rust-lang.org/beta/embedded-book/intro/install/linux.html
-      #
-      # STM32F3DISCOVERY rev A/B - ST-LINK/V2
-      ATTRS{idVendor}=="0483", ATTRS{idProduct}=="3748", TAG+="uaccess"
-
-      # STM32F3DISCOVERY rev C+ - ST-LINK/V2-1
-      ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374b", TAG+="uaccess"
     '';
+
+    # Use OpenOCD with the micro:bit v2 discovery board, see:
+    # https://doc.rust-lang.org/beta/embedded-book/intro/install/linux.html
+    #
+    # TODO (tff): clean this up, this is just for micro:bit v2 boards, I seemed to be suffering from this
+    # problem with udev.extraRules: https://github.com/NixOS/nixpkgs/issues/210856
+    services.udev.packages = [
+      (pkgs.writeTextFile {
+        name = "i2c-udev-rules";
+        text = ''ATTRS{idVendor}=="0d28", ATTRS{idProduct}=="0204", TAG+="uaccess"'';
+        destination = "/etc/udev/rules.d/70-microbit.rules";
+      })
+    ];
 
     # For the available nerdfonts check
     # https://www.nerdfonts.com/font-downloads
