@@ -951,6 +951,15 @@ in
     services.udev.extraRules = lib.optionalString cfg.firmwareDev ''
       # STM32 microcontrollers DFU mode
       SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="0666"
+
+      # Use OpenOCD with the micro:bit v2 discovery board, see:
+      # https://doc.rust-lang.org/beta/embedded-book/intro/install/linux.html
+      #
+      # STM32F3DISCOVERY rev A/B - ST-LINK/V2
+      ATTRS{idVendor}=="0483", ATTRS{idProduct}=="3748", TAG+="uaccess"
+
+      # STM32F3DISCOVERY rev C+ - ST-LINK/V2-1
+      ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374b", TAG+="uaccess"
     '';
 
     # For the available nerdfonts check
