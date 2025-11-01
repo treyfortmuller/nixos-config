@@ -253,6 +253,7 @@ in
       source = ./wallpapers/monolith.jpg;
     };
 
+
     # home-manager configuration
     home-manager.useGlobalPkgs = true;
     home-manager.users.trey =
@@ -278,8 +279,7 @@ in
 
         # I seem to need both of these configs to allow unfree packages to be installed
         # system-wide as well as via e.g. nix-shell invocations.
-        nixpkgs.config.allowUnfree = true;
-
+        #
         # Manage the ~/.config/nixpkgs/config.nix file.
         xdg.configFile."nixpkgs/config.nix".text = ''
           { allowUnfree = true; }
@@ -443,9 +443,9 @@ in
 
         programs.vscode = {
           enable = true;
-          enableExtensionUpdateCheck = false;
-          enableUpdateCheck = false;
-          extensions = with pkgs.vscode-extensions; [
+          profiles.default.enableExtensionUpdateCheck = false;
+          profiles.default.enableUpdateCheck = false;
+          profiles.default.extensions = with pkgs.vscode-extensions; [
             ms-vscode-remote.remote-ssh
             ms-python.python
             ms-vscode.cpptools
@@ -457,7 +457,7 @@ in
             arrterian.nix-env-selector
             streetsidesoftware.code-spell-checker
           ];
-          userSettings = {
+          profiles.default.userSettings = {
             "workbench.colorTheme" = "Default Dark+";
             "explorer.confirmDelete" = false;
             "explorer.confirmDragAndDrop" = false;
@@ -816,8 +816,8 @@ in
           enable = true;
           settings = {
             global = {
-              username_cmd = "${pkgs._1password}/bin/op item get spotify --fields username";
-              password_cmd = "${pkgs._1password}/bin/op item get spotify --fields password";
+              username_cmd = "${pkgs._1password-cli}/bin/op item get spotify --fields username";
+              password_cmd = "${pkgs._1password-cli}/bin/op item get spotify --fields password";
               device_name = "nixos";
             };
           };
@@ -850,7 +850,7 @@ in
         # Be aggressive on new nix CLI features
         unstable.nixVersions.nix_2_31
 
-        _1password
+        _1password-cli
 
         pango # For fonts on Wayland
         slurp # For screen area selection
@@ -879,7 +879,7 @@ in
 
         # PDF
         evince
-        okular
+        kdePackages.okular
 
         # Some nonsense and shenanigans
         figlet
@@ -895,7 +895,6 @@ in
 
         # Yubikey management
         yubikey-manager
-        yubikey-manager-qt
 
         # Tools
         wget
@@ -970,7 +969,9 @@ in
     # https://www.nerdfonts.com/font-downloads
     fonts = {
       enableDefaultPackages = true;
-      packages = [ (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; }) ];
+      packages = [
+        pkgs.nerd-fonts.jetbrains-mono
+      ];
     };
 
     # Some programs need SUID wrappers, can be configured further or are
