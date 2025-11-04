@@ -894,7 +894,7 @@ in
         picocom
 
         # Yubikey management
-        yubikey-manager
+        yubioath-flutter
 
         # Tools
         wget
