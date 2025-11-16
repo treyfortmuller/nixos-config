@@ -292,6 +292,17 @@ in
           extraConfig = ''
             ConnectTimeout=5
           '';
+          # The main SSH config is managed declaratively, but servers come and go so this is extra configuration
+          # meant to be managed imperatively.
+          # 
+          # We'll fill this up with entries for individual hosts:
+          # Host myserver
+          #   HostName 192.168.1.42
+          #   User trey
+          #   IdentityFile ~/.ssh/id_ed25519
+          includes = [
+            "~/.ssh/user_config"
+          ];
         };
 
         programs.bash =
