@@ -18,15 +18,59 @@
   };
 
   outputs =
-    { self
-    , nixpkgs
-    , nixpkgs-unstable
-    , home-manager
-    , nixpkgs-wayland
-    , ...
+    {
+      self,
+      nixpkgs,
+      nixpkgs-unstable,
+      home-manager,
+      nixpkgs-wayland,
+      ...
     }@inputs:
     {
       nixosConfigurations = {
+        # No hardware target, useful for VMs or ISO installers
+        base = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            self.nixosModules.default
+
+            # Inline definitions for sierras options
+            (
+              { lib, ... }:
+              {
+                # A root filesystem must be provided to satisfy an eval assertion, but
+                # really we only use this to build system.build.images.iso-installer which
+                # will onverride this config
+                fileSystems."/" = lib.mkDefault {
+                  device = "none";
+                  fsType = "tmpfs";
+                  options = [ "mode=0755" ];
+                };
+
+                sierras = {
+                  enable = true;
+                  laptop = true;
+                  hostName = "base";
+                  bluetooth = false;
+                  firmwareDev = false;
+                  includeDockerSpecialisation = false;
+                  nvidia = {
+                    proprietaryChaos = false;
+                    cudaDev = false;
+                  };
+                  location = {
+                    latitude = 33.657;
+                    longitude = -117.787;
+                  };
+                };
+              }
+            )
+          ];
+          specialArgs = {
+            inherit inputs;
+          };
+        };
+
         # Custom desktop build, NZXT case
         kearsarge = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
@@ -39,6 +83,7 @@
           };
         };
 
+        # ThinkPad X1 Carbon Gen 6
         ritter = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
@@ -93,15 +138,16 @@
                     export GIO_MODULE_DIR="${prev.glib-networking}/lib/gio/modules/"
                   '';
 
-                  extraPkgs = pkgs: with pkgs; [
-                    cacert
-                    glib
-                    glib-networking
-                    gst_all_1.gst-plugins-bad
-                    gst_all_1.gst-plugins-base
-                    gst_all_1.gst-plugins-good
-                    webkitgtk_4_1
-                  ];
+                  extraPkgs =
+                    pkgs: with pkgs; [
+                      cacert
+                      glib
+                      glib-networking
+                      gst_all_1.gst-plugins-bad
+                      gst_all_1.gst-plugins-base
+                      gst_all_1.gst-plugins-good
+                      webkitgtk_4_1
+                    ];
                 };
               })
 
@@ -111,6 +157,6 @@
           };
       };
 
-      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
+      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-tree;
     };
 }

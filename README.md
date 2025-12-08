@@ -54,33 +54,21 @@ nix flake lock --override-input nixpkgs ../nixpkgs
 
 ### New Machine Bringup
 
-TODO
-
----
-
-Notes on `spotifyd` and `spt`
-
-- trying to authenticate with the 1password CLI `op`
-- eval $(op signin) - what does this do to my environment?
-
-To get this working manually outside of systemd, all in the same terminal
+A minimal ISO installer image for a `sierras` base configuration (basically my entire desktop config modulo any hardware-specific configurations) can be generated with
 
 ```
-eval $(op signin)
-
-# to keep this thing from detaching, `--no-daemon`
-spotify --no-deamon --config-path /nix/store/...
-
-# where I stole the nix store path for the config file from
-systemctl status --user spotifyd which is provided by my nixos config
+nix build -j8 .#nixosConfigurations.base.config.system.build.images.iso-installer
 ```
 
-Then in a new terminal we can open the spotify TUI
+This build took 30 minutes on my 8 core ThinkPad with a nix store which was already a hot cache. That'll spit out a `result` symlinked to an `.iso` we can use `caligula` to burn onto a removable media
 
 ```
-spt
-# proceed to jam out
+nix-shell -p caligula
+
+caligula burn ./nixos-...-linux.iso
 ```
+
+Boot that media and you're basically following the [NixOS manual install](https://nixos.org/manual/nixos/stable/#sec-installation-manual) instructions for the minimal (i.e. GUI-less) installer.
 
 ### Other Resources
 
