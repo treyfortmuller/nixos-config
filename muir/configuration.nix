@@ -17,8 +17,8 @@
   sierras = {
     enable = true;
     hostName = "muir";
-    # primaryDisplayOutput = "eDP-1";
-    # primaryDisplayModeString = "1920x1080@60.012Hz";
+    primaryDisplayOutput = "eDP-1";
+    primaryDisplayModeString = "3200x2000@60.000Hz";
     includeDockerSpecialisation = false;
     laptop = true;
     nvidia.proprietaryChaos = false;
