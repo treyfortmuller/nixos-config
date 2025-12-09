@@ -42,23 +42,26 @@ in
     };
 
     primaryDisplayOutput = mkOption {
-      type = types.str;
+      type = types.nullOr types.str;
       description = ''
         Primary output display name, used for sway and waybar configurations.
         You would grab this configuration with `swaymsg -t get_outputs` once you've launched sway.
+
+        Leave as null if you don't have access to the system to check this at runtime.
       '';
-      default = "DP-1";
       example = "HDMI-A-4";
+      default = null;
     };
 
     primaryDisplayModeString = mkOption {
-      type = types.str;
+      type = types.nullOr types.str;
       description = ''
         Resolution and update framerate configuration string used for sway.
-      '';
 
-      # This is for a DELL S3422DW 5PYVZL3
-      default = "3440x1440@59.973Hz";
+        Leave as null if you don't have access to the system to check this at runtime.
+      '';
+      example = "3440x1440@59.973Hz"; # For a DELL S3422DW 5PYVZL3
+      default = null;
     };
 
     laptop = mkEnableOption "Enables laptop configuration";
@@ -233,14 +236,17 @@ in
     # Enable touchpad support (enabled default in most desktopManager).
     # services.xserver.libinput.enable = true;
 
-    # Define a user account. Don't forget to set a password with ‘passwd’.
+    # Allows us to set password with ‘passwd’ at runtime
+    users.mutableUsers = true;
     users.users.trey = {
       isNormalUser = true;
+      initialPassword = "password"; # Not for long, don't even try...
       extraGroups = [
         "wheel"
         "dialout"
         "audio"
-      ] ++ lib.optionals config.networking.networkmanager.enable [ "networkmanager" ];
+      ]
+      ++ lib.optionals config.networking.networkmanager.enable [ "networkmanager" ];
     };
 
     # TODO (tff): probably move this to home-manager? config.home-manager.users.trey.home.homeDirectory
@@ -252,7 +258,6 @@ in
     environment.etc."wallpaper" = {
       source = ./wallpapers/monolith.jpg;
     };
-
 
     # home-manager configuration
     home-manager.useGlobalPkgs = true;
@@ -294,7 +299,7 @@ in
           '';
           # The main SSH config is managed declaratively, but servers come and go so this is extra configuration
           # meant to be managed imperatively.
-          # 
+          #
           # We'll fill this up with entries for individual hosts:
           # Host myserver
           #   HostName 192.168.1.42
@@ -506,9 +511,11 @@ in
             {
               modifier = mod;
               terminal = "alacritty";
-              output = {
+              output = lib.optionalAttrs (!isNull cfg.primaryDisplayOutput) {
                 "${cfg.primaryDisplayOutput}" = {
-                  mode = "${cfg.primaryDisplayModeString}";
+                  # TODO: would like to be able to correctly render my wallpaper on hotplugged
+                  # monitors which we are not getting right now.
+                  mode = lib.optionalString (!isNull cfg.primaryDisplayModeString) "${cfg.primaryDisplayModeString}";
                   bg = "/etc/wallpaper fill";
                 };
               };
@@ -715,8 +722,9 @@ in
               height = 25;
               reload_style_on_change = true;
 
-              # Hopefully not having an output configures just defaults to outputting on
-              # all displays.
+              # Not having an output configures just defaults to outputting on all displays,
+              # including new ones hotplugged at runtime.
+              #
               # output = [
               #   "${cfg.primaryDisplayOutput}"
               # ];

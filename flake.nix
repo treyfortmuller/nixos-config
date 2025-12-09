@@ -18,12 +18,13 @@
   };
 
   outputs =
-    { self
-    , nixpkgs
-    , nixpkgs-unstable
-    , home-manager
-    , nixpkgs-wayland
-    , ...
+    {
+      self,
+      nixpkgs,
+      nixpkgs-unstable,
+      home-manager,
+      nixpkgs-wayland,
+      ...
     }@inputs:
     {
       nixosConfigurations = {
@@ -35,16 +36,28 @@
             ./kearsarge/configuration.nix
           ];
           specialArgs = {
-            inherit inputs;
+            inherit inputs self;
           };
         };
 
+        # ThinkPad X1 Carbon Gen 6
         ritter = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
             self.nixosModules.default
             ./ritter/configuration.nix
+          ];
+          specialArgs = {
+            inherit inputs self;
+          };
+        };
 
+        # Dell Premium 14
+        muir = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            self.nixosModules.default
+            ./muir/configuration.nix
           ];
           specialArgs = {
             inherit inputs self;
@@ -93,15 +106,16 @@
                     export GIO_MODULE_DIR="${prev.glib-networking}/lib/gio/modules/"
                   '';
 
-                  extraPkgs = pkgs: with pkgs; [
-                    cacert
-                    glib
-                    glib-networking
-                    gst_all_1.gst-plugins-bad
-                    gst_all_1.gst-plugins-base
-                    gst_all_1.gst-plugins-good
-                    webkitgtk_4_1
-                  ];
+                  extraPkgs =
+                    pkgs: with pkgs; [
+                      cacert
+                      glib
+                      glib-networking
+                      gst_all_1.gst-plugins-bad
+                      gst_all_1.gst-plugins-base
+                      gst_all_1.gst-plugins-good
+                      webkitgtk_4_1
+                    ];
                 };
               })
 
@@ -111,6 +125,6 @@
           };
       };
 
-      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
+      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-tree;
     };
 }
