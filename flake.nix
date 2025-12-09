@@ -47,6 +47,8 @@
                   options = [ "mode=0755" ];
                 };
 
+                services.greetd.enable = lib.mkForce false;
+
                 sierras = {
                   enable = true;
                   laptop = true;

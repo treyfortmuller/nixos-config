@@ -247,9 +247,10 @@ in
     # Enable touchpad support (enabled default in most desktopManager).
     # services.xserver.libinput.enable = true;
 
-    # Define a user account. Don't forget to set a password with ‘passwd’.
+    users.mutableUsers = true; # Allow for changing the user passwd after install with `passwd`
     users.users.trey = {
       isNormalUser = true;
+      initialPassword = "password";
       extraGroups = [
         "wheel"
         "dialout"
