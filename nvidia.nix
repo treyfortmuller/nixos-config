@@ -50,7 +50,7 @@ in
           export WLR_NO_HARDWARE_CURSORS=1
         '';
 
-        programs.vscode.userSettings = {
+        programs.vscode.profiles.default.userSettings = {
           "window.titleBarStyle" = "custom";
         };
       };
