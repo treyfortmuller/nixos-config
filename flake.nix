@@ -18,12 +18,13 @@
   };
 
   outputs =
-    { self
-    , nixpkgs
-    , nixpkgs-unstable
-    , home-manager
-    , nixpkgs-wayland
-    , ...
+    {
+      self,
+      nixpkgs,
+      nixpkgs-unstable,
+      home-manager,
+      nixpkgs-wayland,
+      ...
     }@inputs:
     {
       nixosConfigurations = {
@@ -93,15 +94,16 @@
                     export GIO_MODULE_DIR="${prev.glib-networking}/lib/gio/modules/"
                   '';
 
-                  extraPkgs = pkgs: with pkgs; [
-                    cacert
-                    glib
-                    glib-networking
-                    gst_all_1.gst-plugins-bad
-                    gst_all_1.gst-plugins-base
-                    gst_all_1.gst-plugins-good
-                    webkitgtk_4_1
-                  ];
+                  extraPkgs =
+                    pkgs: with pkgs; [
+                      cacert
+                      glib
+                      glib-networking
+                      gst_all_1.gst-plugins-bad
+                      gst_all_1.gst-plugins-base
+                      gst_all_1.gst-plugins-good
+                      webkitgtk_4_1
+                    ];
                 };
               })
 

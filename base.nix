@@ -54,7 +54,7 @@ in
     };
 
     primaryDisplayModeString = mkOption {
-      type = types.nullOr types.str;      
+      type = types.nullOr types.str;
       description = ''
         Resolution and update framerate configuration string used for sway.
 
@@ -245,7 +245,8 @@ in
         "wheel"
         "dialout"
         "audio"
-      ] ++ lib.optionals config.networking.networkmanager.enable [ "networkmanager" ];
+      ]
+      ++ lib.optionals config.networking.networkmanager.enable [ "networkmanager" ];
     };
 
     # TODO (tff): probably move this to home-manager? config.home-manager.users.trey.home.homeDirectory
@@ -257,7 +258,6 @@ in
     environment.etc."wallpaper" = {
       source = ./wallpapers/monolith.jpg;
     };
-
 
     # home-manager configuration
     home-manager.useGlobalPkgs = true;
@@ -299,7 +299,7 @@ in
           '';
           # The main SSH config is managed declaratively, but servers come and go so this is extra configuration
           # meant to be managed imperatively.
-          # 
+          #
           # We'll fill this up with entries for individual hosts:
           # Host myserver
           #   HostName 192.168.1.42
