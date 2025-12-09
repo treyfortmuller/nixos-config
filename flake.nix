@@ -36,16 +36,28 @@
             ./kearsarge/configuration.nix
           ];
           specialArgs = {
-            inherit inputs;
+            inherit inputs self;
           };
         };
 
+        # ThinkPad X1 Carbon Gen 6
         ritter = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
             self.nixosModules.default
             ./ritter/configuration.nix
+          ];
+          specialArgs = {
+            inherit inputs self;
+          };
+        };
 
+        # Dell Premium 14
+        muir = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            self.nixosModules.default
+            ./muir/configuration.nix
           ];
           specialArgs = {
             inherit inputs self;
