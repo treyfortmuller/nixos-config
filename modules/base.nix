@@ -142,6 +142,8 @@ in
         work in the native app, nor the CLI. I just use the browser extension for now.
       '';
     };
+
+    tailscale = mkEnableOption "tailscale VPN";
   };
 
   config = mkIf cfg.enable {
@@ -579,7 +581,7 @@ in
                 # This is overriding the default stacked and tabbed layouts
                 "${mod}+w" = "exec rofi -show window";
                 "${mod}+s" = "exec rofi -show ssh";
-                "${mod}+space" = "exec rofi -show drun";
+                "${mod}+space" = "exec rofi -show drun -show-icons";
                 "${mod}+d" = "focus mode_toggle";
 
                 # Sway defaults differ from i3 a tiny bit here
@@ -973,7 +975,13 @@ in
       ]
       ++ lib.optionals cfg.onePassword [
         unstable._1password-cli
+      ] ++ lib.optionals cfg.tailscale [
+        tailscale
       ];
+
+    services.tailscale = {
+      enable = cfg.tailscale;
+    };
 
     services.udev.extraRules = lib.optionalString cfg.embeddedDev.iNav ''
       # STM32 microcontrollers DFU mode

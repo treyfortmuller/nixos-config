@@ -85,6 +85,9 @@
                   config.allowUnfree = true;
                 };
 
+                # TODO: make this a package, then build it from the command line and see if we get anything worth
+                # tossing into XDG_DATA_DIRS out...
+
                 # See https://github.com/NixOS/nixpkgs/issues/440951 for bambu-studio, was running into
                 # crashes using networking features in bambu-studio. 25.05's derivation builds it from source
                 # whereas this uses the appimage and is a more recent version of the slicer.
