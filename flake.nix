@@ -63,8 +63,6 @@
             inherit inputs self;
           };
         };
-
-        # TODO... add the 2002 Nuc
       };
 
       nixosModules = {
