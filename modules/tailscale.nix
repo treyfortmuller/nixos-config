@@ -25,6 +25,10 @@ in
       pkgs.tailscale
     ];
 
+    environment.shellAliases = {
+      ts = "tailscale";
+    };
+
     services.tailscale = {
       enable = true;
 

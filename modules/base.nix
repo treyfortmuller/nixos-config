@@ -379,6 +379,7 @@ in
               banner
             '';
 
+            # TODO (tff): just move this out of home-manager into environment.shellAliases
             shellAliases =
               let
                 systemPackages = config.environment.systemPackages;
