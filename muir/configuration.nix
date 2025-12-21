@@ -23,7 +23,6 @@
     laptop = true;
     nvidia.proprietaryChaos = false;
     nvidia.cudaDev = false;
-    firmwareDev = true;
     bluetooth = true;
     location.latitude = 33.657;
     location.longitude = -117.787;

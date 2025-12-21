@@ -114,7 +114,19 @@ in
       };
     };
 
-    firmwareDev = mkEnableOption "Flight vehicle firmware development";
+    embeddedDev = {
+      iNav = mkEnableOption "" // {
+        description = ''
+          Configuration for iNav flight controller firmware development.
+        '';
+      };
+
+      microbitV2 = mkEnableOption "" // {
+        description = ''
+          Configuration supporting micro:bit v2 discovery board firmware development.
+        '';
+      };
+    };
 
     bluetooth = mkEnableOption "" // {
       description = "Enable bluetooth hardware and userspace services";
@@ -952,7 +964,7 @@ in
         xorg.xlsclients
       ]
       ++ lib.optionals cfg.laptop [ acpi ]
-      ++ lib.optionals cfg.firmwareDev [
+      ++ lib.optionals cfg.embeddedDev.iNav [
         inav-configurator
         inav-blackbox-tools
       ]
@@ -963,7 +975,7 @@ in
         unstable._1password-cli
       ];
 
-    services.udev.extraRules = lib.optionalString cfg.firmwareDev ''
+    services.udev.extraRules = lib.optionalString cfg.embeddedDev.iNav ''
       # STM32 microcontrollers DFU mode
       SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="0666"
     '';
@@ -971,9 +983,9 @@ in
     # Use OpenOCD with the micro:bit v2 discovery board, see:
     # https://doc.rust-lang.org/beta/embedded-book/intro/install/linux.html
     #
-    # TODO (tff): clean this up, this is just for micro:bit v2 boards, I seemed to be suffering from this
-    # problem with udev.extraRules: https://github.com/NixOS/nixpkgs/issues/210856
-    services.udev.packages = [
+    # I seemed to be suffering from this problem with
+    # udev.extraRules: https://github.com/NixOS/nixpkgs/issues/210856
+    services.udev.packages = lib.optionals cfg.embeddedDev.microbitV2 [
       (pkgs.writeTextFile {
         name = "i2c-udev-rules";
         text = ''ATTRS{idVendor}=="0d28", ATTRS{idProduct}=="0204", TAG+="uaccess"'';

@@ -20,8 +20,11 @@ in
       includeDockerSpecialisation = false;
       nvidia.proprietaryChaos = true;
       nvidia.cudaDev = true;
-      firmwareDev = true;
       yubikeySupport = true;
+      embeddedDev = {
+        iNav = true;
+        microbitV2 = true;
+      };
     };
 
     system.stateVersion = "22.11"; # Did you read the comment?
