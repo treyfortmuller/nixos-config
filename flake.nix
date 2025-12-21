@@ -74,6 +74,7 @@
               home-manager.nixosModules.home-manager
               ./modules/base.nix
               ./modules/nvidia.nix
+              ./modules/tailscale.nix
             ];
 
             # final and prev, a.k.a. "self" and "super" respectively. This overlay

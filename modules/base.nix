@@ -142,8 +142,6 @@ in
         work in the native app, nor the CLI. I just use the browser extension for now.
       '';
     };
-
-    tailscale = mkEnableOption "tailscale VPN";
   };
 
   config = mkIf cfg.enable {
@@ -975,13 +973,7 @@ in
       ]
       ++ lib.optionals cfg.onePassword [
         unstable._1password-cli
-      ] ++ lib.optionals cfg.tailscale [
-        tailscale
       ];
-
-    services.tailscale = {
-      enable = cfg.tailscale;
-    };
 
     services.udev.extraRules = lib.optionalString cfg.embeddedDev.iNav ''
       # STM32 microcontrollers DFU mode

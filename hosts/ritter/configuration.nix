@@ -31,6 +31,7 @@
     location.latitude = 33.657;
     location.longitude = -117.787;
     yubikeySupport = true;
+    tailscale = true;
   };
 
   # Use the systemd-boot EFI boot loader.
