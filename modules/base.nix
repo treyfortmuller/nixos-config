@@ -281,7 +281,7 @@ in
     ];
 
     environment.etc."wallpaper" = {
-      source = ./wallpapers/monolith.jpg;
+      source = ../wallpapers/monolith.jpg;
     };
 
     # home-manager configuration
@@ -303,7 +303,7 @@ in
 
         home.file = {
           "${wallpaperFile}" = {
-            source = ./wallpapers/monolith.jpg;
+            source = ../wallpapers/monolith.jpg;
           };
         };
 
@@ -667,7 +667,7 @@ in
           package = pkgs.rofi-wayland;
           terminal = "${pkgs.alacritty}/bin/alacritty";
           font = systemFont + " " + builtins.toString 12;
-          theme = ./rofi.rasi;
+          theme = ../dots/rofi.rasi;
           extraConfig = {
             display-drun = "Applications";
             display-window = "Windows";

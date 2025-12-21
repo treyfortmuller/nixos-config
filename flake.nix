@@ -33,7 +33,7 @@
           system = "x86_64-linux";
           modules = [
             self.nixosModules.default
-            ./kearsarge/configuration.nix
+            ./hosts/kearsarge/configuration.nix
           ];
           specialArgs = {
             inherit inputs self;
@@ -45,7 +45,7 @@
           system = "x86_64-linux";
           modules = [
             self.nixosModules.default
-            ./ritter/configuration.nix
+            ./hosts/ritter/configuration.nix
           ];
           specialArgs = {
             inherit inputs self;
@@ -57,7 +57,7 @@
           system = "x86_64-linux";
           modules = [
             self.nixosModules.default
-            ./muir/configuration.nix
+            ./hosts/muir/configuration.nix
           ];
           specialArgs = {
             inherit inputs self;
@@ -72,8 +72,8 @@
           {
             imports = [
               home-manager.nixosModules.home-manager
-              ./base.nix
-              ./nvidia.nix
+              ./modules/base.nix
+              ./modules/nvidia.nix
             ];
 
             # final and prev, a.k.a. "self" and "super" respectively. This overlay
