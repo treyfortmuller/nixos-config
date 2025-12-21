@@ -56,32 +56,6 @@ nix flake lock --override-input nixpkgs ../nixpkgs
 
 TODO
 
----
-
-Notes on `spotifyd` and `spt`
-
-- trying to authenticate with the 1password CLI `op`
-- eval $(op signin) - what does this do to my environment?
-
-To get this working manually outside of systemd, all in the same terminal
-
-```
-eval $(op signin)
-
-# to keep this thing from detaching, `--no-daemon`
-spotify --no-deamon --config-path /nix/store/...
-
-# where I stole the nix store path for the config file from
-systemctl status --user spotifyd which is provided by my nixos config
-```
-
-Then in a new terminal we can open the spotify TUI
-
-```
-spt
-# proceed to jam out
-```
-
 ### Other Resources
 
 * [nix-starter-configs](https://github.com/Misterio77/nix-starter-configs/tree/main) from Gabriel Fontes, well-documented and modern flake setup.
