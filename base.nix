@@ -116,7 +116,20 @@ in
 
     firmwareDev = mkEnableOption "Flight vehicle firmware development";
 
-    bluetooth = mkEnableOption "Enable bluetooth hardware and userspace services";
+    bluetooth = mkEnableOption "" // {
+      description = "Enable bluetooth hardware and userspace services";
+    };
+
+    yubikeySupport = mkEnableOption "Yubikey tooling";
+
+    onePassword = mkEnableOption "" // {
+      description = ''
+        Enable the 1Password GUI and CLI.
+
+        As of Dec 2025, authentication using the MFA configuration I have with 1Password didn't
+        work in the native app, nor the CLI. I just use the browser extension for now.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -412,7 +425,7 @@ in
             plenary-nvim
           ];
           extraConfig = ''
-             set number
+            set number
             let mapleader = ','
             noremap ff <cmd>Telescope find_files<cr>
           '';
@@ -467,7 +480,6 @@ in
             ms-vscode.cpptools
             bbenoist.nix
             eamodio.gitlens
-            zxh404.vscode-proto3
             tamasfe.even-better-toml
             rust-lang.rust-analyzer
             arrterian.nix-env-selector
@@ -830,18 +842,7 @@ in
           };
           tray = true;
         };
-
-        services.spotifyd = {
-          enable = true;
-          settings = {
-            global = {
-              username_cmd = "${pkgs._1password-cli}/bin/op item get spotify --fields username";
-              password_cmd = "${pkgs._1password-cli}/bin/op item get spotify --fields password";
-              device_name = "nixos";
-            };
-          };
-        };
-      };
+      }; # home-manager
 
     # The head of home-manager master has a neovim.defaultEditor option
     # to accomplish this, but its not available in 22.11
@@ -854,51 +855,43 @@ in
     environment.systemPackages =
       with pkgs;
       [
+        # Matter
         bambu-studio
-        ookla-speedtest
-        gparted
-        xournalpp
-        gedit
-        spotify
-        libheif
-        pavucontrol
-        pulseaudio
-        wf-recorder
-        unstable.nix-search-cli
 
         # Be aggressive on new nix CLI features
         unstable.nixVersions.nix_2_31
-
-        _1password-cli
-
-        pango # For fonts on Wayland
-        slurp # For screen area selection
-        sway-contrib.grimshot # For screenshots
-        wf-recorder # For screen captured videos
+        unstable.nix-search-cli
 
         # Thirdparty native
         unstable.zoom-us
+        unstable.signal-desktop
+        slack
+        qgroundcontrol
 
         # TODO (tff): what should my strat be here?
         # chromium
         google-chrome
-        slack
-        qgroundcontrol
-        unstable.signal-desktop
 
         # Media
+        pango # For fonts on Wayland
+        slurp # For screen area selection
+        sway-contrib.grimshot # For screenshots
+        wf-recorder # For screen captured videos
         vlc
         ffmpeg
         imagemagick
-
-        # TODO: replace with something wayland compatible
-        # simplescreenrecorder
         meshlab
         ffmpeg-full
+        spotify
+        libheif
+        pavucontrol
+        pulseaudio
 
         # PDF
         evince
         kdePackages.okular
+        xournalpp
+        gedit
 
         # Some nonsense and shenanigans
         figlet
@@ -907,15 +900,14 @@ in
         cbonsai
         neofetch
 
-        # Dev
+        # Tools
         nixfmt-rfc-style
+        ookla-speedtest
+        gparted
         gh
         picocom
-
-        # Yubikey management
-        yubioath-flutter
-
-        # Tools
+        zip
+        unzip
         wget
         ack
         wl-clipboard
@@ -940,7 +932,6 @@ in
         ripgrep
         lsof
         lshw
-        unzip
         tcpdump
         arp-scan
         cryptsetup
@@ -964,6 +955,12 @@ in
       ++ lib.optionals cfg.firmwareDev [
         inav-configurator
         inav-blackbox-tools
+      ]
+      ++ lib.optionals cfg.yubikeySupport [
+        yubioath-flutter
+      ]
+      ++ lib.optionals cfg.onePassword [
+        unstable._1password-cli
       ];
 
     services.udev.extraRules = lib.optionalString cfg.firmwareDev ''
@@ -984,6 +981,18 @@ in
       })
     ];
 
+    services.openssh.enable = true;
+
+    services.pcscd.enable = cfg.yubikeySupport;
+
+    programs.ssh.startAgent = true;
+
+    programs._1password-gui = {
+      enable = cfg.onePassword;
+      package = pkgs.unstable._1password-gui;
+      polkitPolicyOwners = [ "trey" ];
+    };
+
     # For the available nerdfonts check
     # https://www.nerdfonts.com/font-downloads
     fonts = {
@@ -992,27 +1001,6 @@ in
         pkgs.nerd-fonts.jetbrains-mono
       ];
     };
-
-    # Some programs need SUID wrappers, can be configured further or are
-    # started in user sessions.
-    # programs.mtr.enable = true;
-    # programs.gnupg.agent = {
-    #   enable = true;
-    #   enableSSHSupport = true;
-    # };
-
-    # List services that you want to enable:
-    # Enable the OpenSSH daemon.
-    services.openssh.enable = true;
-
-    # Run ssh-agent.
-    programs.ssh.startAgent = true;
-
-    # Open ports in the firewall.
-    # networking.firewall.allowedTCPPorts = [ ... ];
-    # networking.firewall.allowedUDPPorts = [ ... ];
-    # Or disable the firewall altogether.
-    # networking.firewall.enable = false;
 
     # These affect the system settings, /etc/nix/nix.conf, note there can still be user-specific
     # overrides in ~/.config/nix/nix.conf.

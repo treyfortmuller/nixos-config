@@ -27,6 +27,7 @@
     bluetooth = true;
     location.latitude = 33.657;
     location.longitude = -117.787;
+    yubikeySupport = true;
   };
 
   # Use the systemd-boot EFI boot loader.
