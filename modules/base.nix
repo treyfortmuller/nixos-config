@@ -55,7 +55,9 @@ in
       default = null;
     };
 
-    laptop = mkEnableOption "Enables laptop configuration";
+    laptop = mkEnableOption "" // {
+      description = "Enables laptop configuration";
+    };
 
     nvidia = {
       proprietaryChaos = mkOption {

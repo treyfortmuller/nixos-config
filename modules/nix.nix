@@ -1,6 +1,11 @@
 # These settings are purposefully not opt-in to guarantee reproducibility.
 
-{ inputs, lib, config, ... }:
+{
+  inputs,
+  lib,
+  config,
+  ...
+}:
 let
   flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
 in
