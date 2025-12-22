@@ -29,6 +29,9 @@ in
         which home-manager config will apply. I maintain this top-level option mostly because
         I like to mix home-manager and OS-level configuration in modules, and I don't care about
         using my home-manager config outside of its NixOS deployment.
+
+        My personal machines just have a single user, if I had more user to add then
+        home-manager.sharedModules and a reusable home-manager configuration might be useful.
       '';
       default = "trey";
     };
@@ -41,29 +44,6 @@ in
         https://en.wikipedia.org/wiki/List_of_mountain_peaks_of_California
       '';
       example = "kearsarge";
-    };
-
-    primaryDisplayOutput = mkOption {
-      type = types.nullOr types.str;
-      description = ''
-        Primary output display name, used for sway and waybar configurations.
-        You would grab this configuration with `swaymsg -t get_outputs` once you've launched sway.
-
-        Leave as null if you don't have access to the system to check this at runtime.
-      '';
-      example = "HDMI-A-4";
-      default = null;
-    };
-
-    primaryDisplayModeString = mkOption {
-      type = types.nullOr types.str;
-      description = ''
-        Resolution and update framerate configuration string used for sway.
-
-        Leave as null if you don't have access to the system to check this at runtime.
-      '';
-      example = "3440x1440@59.973Hz"; # For a DELL S3422DW 5PYVZL3
-      default = null;
     };
 
     laptop = mkEnableOption "" // {
@@ -170,7 +150,9 @@ in
   };
 
   config = mkIf cfg.enable {
-    networking.hostName = cfg.hostName;
+    # Use the systemd-boot EFI boot loader.
+    boot.loader.systemd-boot.enable = true;
+    boot.loader.efi.canTouchEfiVariables = true;
 
     specialisation = mkIf cfg.includeDockerSpecialisation {
       # Docker tends to get in my way, leaving processes running and screwing with my
@@ -182,12 +164,7 @@ in
       };
     };
 
-    # Use the systemd-boot EFI boot loader.
-    boot.loader.systemd-boot.enable = true;
-    boot.loader.efi.canTouchEfiVariables = true;
-
-    # networking.hostName = "nixos"; # Define your hostname.
-    # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+    networking.hostName = cfg.hostName;
     networking.networkmanager.enable = true;
 
     # If null, the timezone will default to UTC and can be set imperatively
@@ -252,11 +229,14 @@ in
       ++ lib.optionals config.networking.networkmanager.enable [ "networkmanager" ];
     };
 
-    # TODO (tff): probably move this to home-manager? config.home-manager.users.trey.home.homeDirectory
-    systemd.tmpfiles.rules = [
-      # This is where my screenshots go
-      "d /home/trey/screenshots - trey users - -"
-    ];
+    # This is where my screenshots go
+    systemd.tmpfiles.rules =
+      let
+        homeDir = config.home-manager.users.${cfg.user}.home.homeDirectory;
+      in
+      [
+        "d ${homeDir}/screenshots - trey users - -"
+      ];
 
     environment.etc."wallpaper" = {
       source = ../wallpapers/monolith.jpg;
@@ -384,8 +364,9 @@ in
         brightnessctl
         wlogout
 
-        # For checking on processes using XWayland
-        xorg.xlsclients
+        # Wayland
+        xorg.xlsclients # For checking on processes using XWayland
+        wdisplays
       ]
       ++ lib.optionals cfg.laptop [ acpi ]
       ++ lib.optionals cfg.yubikeySupport [

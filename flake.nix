@@ -79,16 +79,9 @@
           {
             imports = [
               home-manager.nixosModules.home-manager
-              (
-                { config, ... }:
-                {
-                  home-manager.useGlobalPkgs = true;
-                  home-manager.useUserPackages = true;
-                  home-manager.users.${config.sierras.user} = import ./modules/home-manager/home.nix;
-                }
-              )
-              ./modules/nix.nix
               ./modules/base.nix
+              ./modules/home.nix
+              ./modules/nix.nix
               ./modules/nvidia.nix
               ./modules/tailscale.nix
               ./modules/embedded.nix
