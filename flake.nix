@@ -80,6 +80,7 @@
                   home-manager.users.trey = import ./modules/home-manager/home.nix;
                 }
               )
+              ./modules/nix.nix
               ./modules/base.nix
               ./modules/nvidia.nix
               ./modules/tailscale.nix

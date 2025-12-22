@@ -173,8 +173,6 @@ in
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
 
-    nixpkgs.config.allowUnfree = true;
-
     # networking.hostName = "nixos"; # Define your hostname.
     # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
     networking.networkmanager.enable = true;
@@ -407,20 +405,6 @@ in
       enableDefaultPackages = true;
       packages = [
         pkgs.nerd-fonts.jetbrains-mono
-      ];
-    };
-
-    # These affect the system settings, /etc/nix/nix.conf, note there can still be user-specific
-    # overrides in ~/.config/nix/nix.conf.
-    nix.settings = {
-      trusted-users = [
-        "root"
-        "trey"
-        "@wheel"
-      ];
-      experimental-features = [
-        "nix-command"
-        "flakes"
       ];
     };
   };
