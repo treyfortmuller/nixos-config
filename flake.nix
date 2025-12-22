@@ -121,10 +121,6 @@
         }
       );
 
-      # overlays.default = final: prev: {
-      #   bambu-studio =
-      # };
-
-      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-tree;
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
     };
 }
