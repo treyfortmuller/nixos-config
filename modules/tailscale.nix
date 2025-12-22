@@ -1,6 +1,6 @@
 # TODO (tff): might be possible to do a one-shot daemon to auto-login with an agenix secret for the
 # tailscale auth key? Could be cool idk...
-# 
+#
 # Strike that, the upstream module already implemented one for us! https://github.com/NixOS/nixpkgs/blob/nixos-25.11/nixos/modules/services/networking/tailscale.nix#L183
 
 # Run `tailscale up` for an initial authentication

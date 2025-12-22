@@ -378,23 +378,6 @@ in
 
               banner
             '';
-
-            # TODO (tff): just move this out of home-manager into environment.shellAliases
-            shellAliases =
-              let
-                systemPackages = config.environment.systemPackages;
-              in
-              {
-                ll = "ls -lhtr";
-                csv = "column -s, -t ";
-                jfu = "journalctl -fu";
-                ip = "ip -c";
-                perms = ''stat --format "%a %n"'';
-                nixos-config = "cd ~/sources/nixos-config";
-                diff = "diff -y --color";
-                heic-convert = "for file in *.HEIC; do heif-dec $file \${file/%.HEIC/.jpg}; done";
-              }
-              // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) { clock = "tty-clock -btc"; };
           };
 
         programs.fzf = {
@@ -863,6 +846,25 @@ in
       EDITOR = "nvim";
     };
 
+    environment.shellAliases =
+      let
+        systemPackages = config.environment.systemPackages;
+        inherit (pkgs) tty-clock libheif;
+      in
+      {
+        ll = "ls -lhtr";
+        csv = "column -s, -t ";
+        jfu = "journalctl -fu";
+        ip = "ip -c";
+        perms = ''stat --format "%a %n"'';
+        nixos-config = "cd ~/sources/nixos-config";
+        diff = "diff -y --color";
+      }
+      // lib.optionalAttrs (builtins.elem tty-clock systemPackages) { clock = "tty-clock -btc"; }
+      // lib.optionalAttrs (builtins.elem libheif systemPackages) {
+        heic-convert = "for file in *.HEIC; do heif-dec $file \${file/%.HEIC/.jpg}; done";
+      };
+
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     environment.systemPackages =
@@ -953,7 +955,6 @@ in
         nix-tree
         nix-diff
         socat
-        remmina
         feh
         git-lfs
         sshping
