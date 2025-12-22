@@ -23,7 +23,7 @@
     laptop = true;
     nvidia.proprietaryChaos = false;
     nvidia.cudaDev = false;
-    embeddedDev = {
+    embedded = {
       iNav = true;
       microbitV2 = true;
     };
@@ -31,6 +31,7 @@
     location.latitude = 33.657;
     location.longitude = -117.787;
     yubikeySupport = true;
+    tailscale = true;
   };
 
   # Use the systemd-boot EFI boot loader.

@@ -114,20 +114,6 @@ in
       };
     };
 
-    embeddedDev = {
-      iNav = mkEnableOption "" // {
-        description = ''
-          Configuration for iNav flight controller firmware development.
-        '';
-      };
-
-      microbitV2 = mkEnableOption "" // {
-        description = ''
-          Configuration supporting micro:bit v2 discovery board firmware development.
-        '';
-      };
-    };
-
     bluetooth = mkEnableOption "" // {
       description = "Enable bluetooth hardware and userspace services";
     };
@@ -378,22 +364,6 @@ in
 
               banner
             '';
-
-            shellAliases =
-              let
-                systemPackages = config.environment.systemPackages;
-              in
-              {
-                ll = "ls -lhtr";
-                csv = "column -s, -t ";
-                jfu = "journalctl -fu";
-                ip = "ip -c";
-                perms = ''stat --format "%a %n"'';
-                nixos-config = "cd ~/sources/nixos-config";
-                diff = "diff -y --color";
-                heic-convert = "for file in *.HEIC; do heif-dec $file \${file/%.HEIC/.jpg}; done";
-              }
-              // lib.optionalAttrs (builtins.elem pkgs.tty-clock systemPackages) { clock = "tty-clock -btc"; };
           };
 
         programs.fzf = {
@@ -579,7 +549,7 @@ in
                 # This is overriding the default stacked and tabbed layouts
                 "${mod}+w" = "exec rofi -show window";
                 "${mod}+s" = "exec rofi -show ssh";
-                "${mod}+space" = "exec rofi -show drun";
+                "${mod}+space" = "exec rofi -show drun -show-icons";
                 "${mod}+d" = "focus mode_toggle";
 
                 # Sway defaults differ from i3 a tiny bit here
@@ -862,6 +832,25 @@ in
       EDITOR = "nvim";
     };
 
+    environment.shellAliases =
+      let
+        systemPackages = config.environment.systemPackages;
+        inherit (pkgs) tty-clock libheif;
+      in
+      {
+        ll = "ls -lhtr";
+        csv = "column -s, -t ";
+        jfu = "journalctl -fu";
+        ip = "ip -c";
+        perms = ''stat --format "%a %n"'';
+        nixos-config = "cd ~/sources/nixos-config";
+        diff = "diff -y --color";
+      }
+      // lib.optionalAttrs (builtins.elem tty-clock systemPackages) { clock = "tty-clock -btc"; }
+      // lib.optionalAttrs (builtins.elem libheif systemPackages) {
+        heic-convert = "for file in *.HEIC; do heif-dec $file \${file/%.HEIC/.jpg}; done";
+      };
+
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     environment.systemPackages =
@@ -952,7 +941,6 @@ in
         nix-tree
         nix-diff
         socat
-        remmina
         feh
         git-lfs
         sshping
@@ -964,34 +952,12 @@ in
         xorg.xlsclients
       ]
       ++ lib.optionals cfg.laptop [ acpi ]
-      ++ lib.optionals cfg.embeddedDev.iNav [
-        inav-configurator
-        inav-blackbox-tools
-      ]
       ++ lib.optionals cfg.yubikeySupport [
         yubioath-flutter
       ]
       ++ lib.optionals cfg.onePassword [
         unstable._1password-cli
       ];
-
-    services.udev.extraRules = lib.optionalString cfg.embeddedDev.iNav ''
-      # STM32 microcontrollers DFU mode
-      SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="0666"
-    '';
-
-    # Use OpenOCD with the micro:bit v2 discovery board, see:
-    # https://doc.rust-lang.org/beta/embedded-book/intro/install/linux.html
-    #
-    # I seemed to be suffering from this problem with
-    # udev.extraRules: https://github.com/NixOS/nixpkgs/issues/210856
-    services.udev.packages = lib.optionals cfg.embeddedDev.microbitV2 [
-      (pkgs.writeTextFile {
-        name = "i2c-udev-rules";
-        text = ''ATTRS{idVendor}=="0d28", ATTRS{idProduct}=="0204", TAG+="uaccess"'';
-        destination = "/etc/udev/rules.d/70-microbit.rules";
-      })
-    ];
 
     services.openssh.enable = true;
 

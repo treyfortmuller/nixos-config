@@ -74,6 +74,8 @@
               home-manager.nixosModules.home-manager
               ./modules/base.nix
               ./modules/nvidia.nix
+              ./modules/tailscale.nix
+              ./modules/embedded.nix
             ];
 
             # final and prev, a.k.a. "self" and "super" respectively. This overlay
@@ -84,6 +86,9 @@
                   system = final.system;
                   config.allowUnfree = true;
                 };
+
+                # TODO: make this a package, then build it from the command line and see if we get anything worth
+                # tossing into XDG_DATA_DIRS out...
 
                 # See https://github.com/NixOS/nixpkgs/issues/440951 for bambu-studio, was running into
                 # crashes using networking features in bambu-studio. 25.05's derivation builds it from source

@@ -21,7 +21,7 @@ in
       nvidia.proprietaryChaos = true;
       nvidia.cudaDev = true;
       yubikeySupport = true;
-      embeddedDev = {
+      embedded = {
         iNav = true;
         microbitV2 = true;
       };
