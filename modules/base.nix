@@ -46,8 +46,32 @@ in
       example = "kearsarge";
     };
 
-    laptop = mkEnableOption "" // {
-      description = "Enables laptop configuration";
+    laptop = {
+      enable = mkEnableOption "" // {
+        description = "Enables laptop configuration";
+      };
+
+      internalDisplay = mkOption {
+        type = types.nullOr types.str;
+        default = "eDP-1";
+        description = ''
+          If this is a laptop, when we hotplug a monitor we'd like the positioning of
+          the the monitors to be predictable, my sway configuration pins the display described
+          by this option to the upper left corner of the available screen real-estate. Nulling
+          this value out means no extra configuration is applied to sway.
+
+          Get this name by running `swaymsg -t get_outputs`, you'll see some output of the form
+
+          Output eDP-1 'BOE 0x06DF Unknown'
+            Current mode: 1920x1080 @ 60.012 Hz
+            Power: on
+            Position: 0,0
+            ...
+
+          wdisplays offers a GUI for dynamic repositioning if need be, and "kanshi" is a
+          home-manager configurable service I haven't deployed for more dynamic and complicated setups.
+        '';
+      };
     };
 
     nvidia = {
@@ -368,7 +392,7 @@ in
         xorg.xlsclients # For checking on processes using XWayland
         wdisplays
       ]
-      ++ lib.optionals cfg.laptop [ acpi ]
+      ++ lib.optionals cfg.laptop.enable [ acpi ]
       ++ lib.optionals cfg.yubikeySupport [
         yubioath-flutter
       ]

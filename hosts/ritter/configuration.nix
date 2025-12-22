@@ -18,7 +18,8 @@
     enable = true;
     hostName = "ritter";
     includeDockerSpecialisation = false;
-    laptop = true;
+    laptop.enable = true;
+    laptop.internalDisplay = "eDP-1";
     nvidia.proprietaryChaos = false;
     nvidia.cudaDev = false;
     embedded = {

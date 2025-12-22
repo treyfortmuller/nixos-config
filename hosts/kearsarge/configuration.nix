@@ -27,7 +27,6 @@ in
 
     system.stateVersion = "22.11"; # Did you read the comment?
 
-    # TODO (tff): make a module for laptops, sort out the cpuFreqGovernor based on those options.
     powerManagement.cpuFreqGovernor = "performance";
 
     # Disable the PC speaker "audio card"

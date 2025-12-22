@@ -18,7 +18,8 @@
     enable = true;
     hostName = "muir";
     includeDockerSpecialisation = false;
-    laptop = true;
+    laptop.enable = true;
+    laptop.internalDisplay = "eDP-1";
     nvidia.proprietaryChaos = false;
     nvidia.cudaDev = false;
     bluetooth.enable = true;

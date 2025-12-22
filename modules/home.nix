@@ -236,6 +236,11 @@ in
               "*" = {
                 bg = "/etc/wallpaper fill";
               };
+            }
+            // lib.optionalAttrs (cfg.laptop.enable && !isNull cfg.laptop.internalDisplay) {
+              "${cfg.laptop.internalDisplay}" = {
+                pos = "0 0"; # Always keep the laptop's display pinned to the top-left
+              };
             };
 
             # Will start up swaybar by default, I've enabled with programs.waybar.systemd.enable
