@@ -80,11 +80,11 @@
             imports = [
               home-manager.nixosModules.home-manager
               (
-                { ... }:
+                { config, ... }:
                 {
                   home-manager.useGlobalPkgs = true;
                   home-manager.useUserPackages = true;
-                  home-manager.users.trey = import ./modules/home-manager/home.nix;
+                  home-manager.users.${config.sierras.user} = import ./modules/home-manager/home.nix;
                 }
               )
               ./modules/nix.nix
@@ -111,15 +111,9 @@
           };
       };
 
-      packages = forAllSystems (
-        system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-        in
-        {
-          bambu-studio = pkgs.callPackage ./pkgs/bambu-studio.nix { };
-        }
-      );
+      packages = forAllSystems (system: {
+        bambu-studio = nixpkgs.legacyPackages.${system}.callPackage ./pkgs/bambu-studio.nix { };
+      });
 
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
     };

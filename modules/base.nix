@@ -22,6 +22,17 @@ in
   options.sierras = {
     enable = mkEnableOption "Enable Sierras";
 
+    user = mkOption {
+      type = types.str;
+      description = ''
+        The "primary" user. This user will be automatically created, and its the user for
+        which home-manager config will apply. I maintain this top-level option mostly because
+        I like to mix home-manager and OS-level configuration in modules, and I don't care about
+        using my home-manager config outside of its NixOS deployment.
+      '';
+      default = "trey";
+    };
+
     hostName = mkOption {
       type = types.str;
       description = ''
@@ -167,7 +178,7 @@ in
       # to hop into when I need it.
       docker.configuration = {
         virtualisation.docker.enable = true;
-        users.users.trey.extraGroups = [ "docker" ];
+        users.users.${cfg.user}.extraGroups = [ "docker" ];
       };
     };
 
@@ -183,7 +194,6 @@ in
     # using timedatectl.
     time.timeZone = null;
 
-    # TODO (tff): I dont think this is working
     # Make the sudo password validity timeout a bit longer
     security.sudo.extraConfig = ''
       Defaults        timestamp_timeout=10
@@ -199,10 +209,6 @@ in
       enable = true;
       enable32Bit = true;
     };
-
-    # Enable CUPS to print documents.
-    services.printing.enable = true;
-    services.printing.drivers = with pkgs; [ gutenprint ];
 
     services.greetd = {
       enable = true;
@@ -235,7 +241,7 @@ in
 
     # Allows us to set password with ‘passwd’ at runtime
     users.mutableUsers = true;
-    users.users.trey = {
+    users.users.${cfg.user} = {
       isNormalUser = true;
       initialPassword = "password"; # Not for long, don't even try...
       extraGroups = [

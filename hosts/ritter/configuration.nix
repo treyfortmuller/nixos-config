@@ -32,7 +32,7 @@
     location.longitude = -117.787;
     yubikeySupport = true;
     tailscale = true;
-    obs.enable = true;
+    obs.enable = false;
   };
 
   # Use the systemd-boot EFI boot loader.

@@ -6,16 +6,15 @@
 }:
 let
   inherit (lib) mkIf mkEnableOption;
-  cfg = config.sierras.obs;
+  cfg = config.sierras;
 in
 {
   options.sierras.obs = {
     enable = mkEnableOption "OBS studio with V4L support";
   };
 
-  config = mkIf cfg.enable {
-    # TODO: is this aliased to something easier?
-    home-manager.users.trey.programs.obs-studio = {
+  config = mkIf cfg.obs.enable {
+    home-manager.users.${cfg.user}.programs.obs-studio = {
       enable = true;
       plugins = with pkgs.obs-studio-plugins; [
         wlrobs

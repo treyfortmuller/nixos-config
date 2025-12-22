@@ -8,6 +8,7 @@
 }:
 let
   flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
+  cfg = config.sierras;
 in
 {
   nixpkgs.config.allowUnfree = true;
@@ -18,8 +19,8 @@ in
     settings = {
       trusted-users = [
         "root"
-        "trey" # TODO (tff): another good reason to just have a top-level single-user config
         "@wheel"
+        "${cfg.user}"
       ];
       experimental-features = [
         "nix-command"
