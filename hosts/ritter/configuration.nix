@@ -23,7 +23,7 @@
     laptop = true;
     nvidia.proprietaryChaos = false;
     nvidia.cudaDev = false;
-    embeddedDev = {
+    embedded = {
       iNav = true;
       microbitV2 = true;
     };

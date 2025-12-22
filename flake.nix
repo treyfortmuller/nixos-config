@@ -75,6 +75,7 @@
               ./modules/base.nix
               ./modules/nvidia.nix
               ./modules/tailscale.nix
+              ./modules/embedded.nix
             ];
 
             # final and prev, a.k.a. "self" and "super" respectively. This overlay
