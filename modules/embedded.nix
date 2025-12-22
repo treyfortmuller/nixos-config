@@ -29,9 +29,9 @@ in
   # above options, add a guard if need be.
   config = {
     environment.systemPackages = lib.optionals cfg.iNav [
-        pkgs.inav-configurator
-        pkgs.inav-blackbox-tools
-      ];
+      pkgs.inav-configurator
+      pkgs.inav-blackbox-tools
+    ];
 
     services.udev.extraRules = lib.optionalString cfg.iNav ''
       # STM32 microcontrollers DFU mode

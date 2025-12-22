@@ -72,10 +72,20 @@
           {
             imports = [
               home-manager.nixosModules.home-manager
+              (
+                { ... }:
+                {
+                  home-manager.useGlobalPkgs = true;
+                  home-manager.useUserPackages = true;
+                  home-manager.users.trey = import ./modules/home-manager/home.nix;
+                }
+              )
               ./modules/base.nix
               ./modules/nvidia.nix
               ./modules/tailscale.nix
               ./modules/embedded.nix
+              ./modules/bluetooth.nix
+              ./modules/obs-studio.nix
             ];
 
             # final and prev, a.k.a. "self" and "super" respectively. This overlay

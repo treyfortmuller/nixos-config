@@ -27,11 +27,12 @@
       iNav = true;
       microbitV2 = true;
     };
-    bluetooth = true;
+    bluetooth.enable = true;
     location.latitude = 33.657;
     location.longitude = -117.787;
     yubikeySupport = true;
     tailscale = true;
+    obs.enable = true;
   };
 
   # Use the systemd-boot EFI boot loader.
@@ -40,5 +41,4 @@
 
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
   system.stateVersion = "24.05"; # Did you read the comment?
-
 }

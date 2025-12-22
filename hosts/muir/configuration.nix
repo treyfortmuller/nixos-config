@@ -23,7 +23,7 @@
     laptop = true;
     nvidia.proprietaryChaos = false;
     nvidia.cudaDev = false;
-    bluetooth = true;
+    bluetooth.enable = true;
     location.latitude = 33.657;
     location.longitude = -117.787;
     yubikeySupport = true;

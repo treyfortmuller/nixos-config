@@ -34,21 +34,5 @@ in
 
     # Disable the PC speaker "audio card"
     boot.blacklistedKernelModules = [ "snd_pcsp" ];
-
-    # Sound card kernel module configuration.
-    # boot.extraModprobeConfig = ''
-    #   options snd slots=snd_hda_intel
-    #   options snd_hda_intel enable=0,1
-    #   options i2c-stub chip_addr=0x20
-    # '';
-
-    # boot.kernelModules = [ "i2c-dev" "i2c-stub" ];
-
-    # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-    # Per-interface useDHCP will be mandatory in the future, so this generated config
-    # replicates the default behaviour.
-    # networking.useDHCP = false;
-    # networking.interfaces.enp59s0.useDHCP = true;
-    # networking.interfaces.wlo1.useDHCP = true;
   };
 }
