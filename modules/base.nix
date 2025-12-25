@@ -296,6 +296,8 @@ in
     environment.systemPackages =
       with pkgs;
       [
+        unstable.via
+
         # Matter
         bambu-studio
 
@@ -399,6 +401,9 @@ in
       ++ lib.optionals cfg.onePassword [
         unstable._1password-cli
       ];
+
+    # For keyboards running QMK configurable with Via
+    services.udev.packages = [ pkgs.unstable.via ];
 
     services.openssh.enable = true;
 
