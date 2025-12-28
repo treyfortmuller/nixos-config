@@ -542,7 +542,8 @@ in
         # style = builtins.readFile ./some-path.css;
       };
 
-      services.tailscale-systray.enable = true;
+      # TODO: enable with 25.11
+      # services.tailscale-systray.enable = true;
 
       services.gammastep = {
         enable = true;
