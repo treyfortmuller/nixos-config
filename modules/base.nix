@@ -340,8 +340,8 @@ in
         figlet
         cmatrix
         tty-clock
-        cbonsai
         neofetch
+        bastet
 
         # Tools
         nixfmt-rfc-style
