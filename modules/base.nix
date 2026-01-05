@@ -291,12 +291,18 @@ in
         heic-convert = "for file in *.HEIC; do heif-dec $file \${file/%.HEIC/.jpg}; done";
       };
 
+    environment.interactiveShellInit = ''
+      # Source 'complete_alias' so we can generate lazy-loaded completions for our shell aliases
+      . ${pkgs.complete-alias}/bin/complete_alias
+    '';
+
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     environment.systemPackages =
       with pkgs;
       [
         unstable.via
+        exfatprogs
 
         # Matter
         bambu-studio

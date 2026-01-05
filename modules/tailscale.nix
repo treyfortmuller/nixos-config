@@ -26,6 +26,11 @@ in
       ts = "tailscale";
     };
 
+    # Assumes complete-alias has already been sourced
+    environment.interactiveShellInit = ''
+      complete -F _complete_alias ts
+    '';
+
     services.tailscale = {
       enable = true;
 
