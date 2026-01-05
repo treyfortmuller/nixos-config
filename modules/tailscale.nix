@@ -23,17 +23,6 @@ in
   options.sierras.tailscale = {
     enable = mkEnableOption "tailscale";
 
-    authKeyFile = mkOption {
-      type = types.nullOr types.path;
-      default = null;
-      description = ''
-        An absolute path to a file containing the auth key, tailscale will be
-        automatically started if provided. Deploy this with a secrets management
-        scheme like agenix or sops-nix.
-      '';
-      example = "/foo/bar/baz.key";
-    };
-
     taildropPath = mkOption {
       type = types.nullOr types.path;
       default = null;
@@ -55,12 +44,25 @@ in
       '';
     };
 
+    authKeyFile = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = ''
+        An absolute path to a file containing the auth key, tailscale will be
+        automatically started if provided. Deploy this with a secrets management
+        scheme like agenix or sops-nix.
+      '';
+      example = "/foo/bar/baz.key";
+    };
+
     hostName = mkOption {
       type = types.nullOr types.str;
       default = null;
       description = ''
         hostname to use on the tailnet instead of the one provided by the OS.
         Null will use the hostname of the machine.
+
+        This option is only relevant for auto-auth with a non-null authKeyFile.
       '';
     };
 
@@ -70,6 +72,8 @@ in
       description = ''
         Unix username to allow to operate on tailscaled without sudo. Null indicates
         that sudo must be used by all users to make changes or use taildrop.
+
+        This option is only relevant for auto-auth with a non-null authKeyFile.
       '';
     };
   };
