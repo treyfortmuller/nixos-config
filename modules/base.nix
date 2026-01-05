@@ -303,6 +303,7 @@ in
       [
         unstable.via
         exfatprogs
+        nixfmt-tree # "treefmt" on your PATH
 
         # Matter
         bambu-studio

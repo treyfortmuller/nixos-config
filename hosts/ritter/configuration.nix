@@ -30,8 +30,19 @@
     location.latitude = 33.657;
     location.longitude = -117.787;
     yubikeySupport = true;
-    tailscale = true;
     obs.enable = false;
+    tailscale =
+      let
+        treyUser = config.users.users.trey;
+      in
+      {
+        enable = true;
+        authKeyFile = null; # TODO: can add in secrets management later
+        taildropPath = treyUser.home + "/taildrop";
+        taildropUser = treyUser.name;
+        hostName = "sierras-${config.networking.hostName}";
+        operator = treyUser.name;
+      };
   };
 
   # Use the systemd-boot EFI boot loader.
