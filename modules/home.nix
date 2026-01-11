@@ -46,6 +46,23 @@ in
         includes = [
           "~/.ssh/user_config"
         ];
+
+        # This is the old default configuration that home-manager shipped for SSH,
+        # the default values will be deprecated in the future so I'm pasting them in
+        # manually here.
+        enableDefaultConfig = false;
+        matchBlocks."*" = {
+          forwardAgent = false;
+          addKeysToAgent = "no";
+          compression = false;
+          serverAliveInterval = 0;
+          serverAliveCountMax = 3;
+          hashKnownHosts = false;
+          userKnownHostsFile = "~/.ssh/known_hosts";
+          controlMaster = "no";
+          controlPath = "~/.ssh/master-%r@%n:%p";
+          controlPersist = "no";
+        };
       };
 
       programs.bash =
@@ -142,8 +159,6 @@ in
 
       programs.git = {
         enable = true;
-        userName = "Trey Fortmuller";
-        userEmail = "tfortmuller@mac.com";
 
         # Globally ignored
         ignores = [
@@ -151,27 +166,32 @@ in
           "*.swp"
         ];
 
-        aliases = {
-          # List aliases
-          la = "!git config --list | grep -E '^alias' | cut -c 7-";
+        settings = {
+          user = {
+            name = "Trey Fortmuller";
+            email = "tfortmuller@mac.com";
+          };
 
-          # Beautiful one-liner log, last 20 commits
-          l = "log --pretty=\"%C(Yellow)%h  %C(reset)%ad (%C(Green)%cr%C(reset))%x09 %C(Cyan)%an %C(reset)%s\" --date=short -20";
+          alias = {
+            # List aliases
+            la = "!git config --list | grep -E '^alias' | cut -c 7-";
 
-          # Most recently checked-out branches
-          recent = "!git reflog show --pretty=format:'%gs ~ %gd' --date=relative | grep 'checkout:' | grep -oE '[^ ]+ ~ .*' | awk -F~ '!seen[$1]++' | head -n 10 | awk -F' ~ HEAD@{' '{printf(\"  \\033[33m%s: \\033[37m %s\\033[0m\\n\", substr($2, 1, length($2)-1), $1)}'";
+            # Beautiful one-liner log, last 20 commits
+            l = "log --pretty=\"%C(Yellow)%h  %C(reset)%ad (%C(Green)%cr%C(reset))%x09 %C(Cyan)%an %C(reset)%s\" --date=short -20";
 
-          last = "log -1 HEAD";
-          unstage = "reset HEAD --";
-          b = "branch --show";
-          a = "add";
-          c = "commit";
-          s = "status -s";
-          co = "checkout";
-          cob = "checkout -b";
-        };
+            # Most recently checked-out branches
+            recent = "!git reflog show --pretty=format:'%gs ~ %gd' --date=relative | grep 'checkout:' | grep -oE '[^ ]+ ~ .*' | awk -F~ '!seen[$1]++' | head -n 10 | awk -F' ~ HEAD@{' '{printf(\"  \\033[33m%s: \\033[37m %s\\033[0m\\n\", substr($2, 1, length($2)-1), $1)}'";
 
-        extraConfig = {
+            last = "log -1 HEAD";
+            unstage = "reset HEAD --";
+            b = "branch --show";
+            a = "add";
+            c = "commit";
+            s = "status -s";
+            co = "checkout";
+            cob = "checkout -b";
+          };
+
           pull.rebase = false;
           push.autoSetupRemote = true;
           init.defaultBranch = "master";
@@ -363,7 +383,7 @@ in
 
       programs.rofi = {
         enable = true;
-        package = pkgs.rofi-wayland;
+        # package = pkgs.rofi-wayland; TODO: delete?
         terminal = "${pkgs.alacritty}/bin/alacritty";
         font = cfg.systemFont.normal + " " + builtins.toString 12;
         theme = dotfiles + /rofi.rasi;
