@@ -10,11 +10,6 @@
       url = "github:nix-community/home-manager?ref=release-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    nixpkgs-wayland = {
-      url = "github:nix-community/nixpkgs-wayland";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
@@ -23,7 +18,6 @@
       nixpkgs,
       nixpkgs-unstable,
       home-manager,
-      nixpkgs-wayland,
       ...
     }@inputs:
     let
@@ -53,18 +47,6 @@
           modules = [
             self.nixosModules.default
             ./hosts/ritter/configuration.nix
-          ];
-          specialArgs = {
-            inherit inputs self;
-          };
-        };
-
-        # Dell Premium 14
-        muir = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [
-            self.nixosModules.default
-            ./hosts/muir/configuration.nix
           ];
           specialArgs = {
             inherit inputs self;
