@@ -56,6 +56,31 @@ nix flake lock --override-input nixpkgs ../nixpkgs
 
 TODO
 
+### nixbuild.net
+
+nixbuild.net is remote builders for hire. They'll give you 25 free CPU-hours after you sign up which is pretty sweet. I use them for big aarch64 builds, where cross compilation isn't either possible or isn't worth figuring out. There's a `nixbuild-net.nix` module in this tree to set up the config. The TLDR is that you'll need to register your SSH public key with nixbuild.net, and then call out the path to your private key via the options I exposed in that module.
+
+See the getting started docs [here](https://docs.nixbuild.net/getting-started/).
+
+You can verify shell access with
+
+```
+sudo ssh eu.nixbuild.net shell
+```
+
+and try out your first (aarch64) build with 
+
+```
+nix-build \
+  --max-jobs 0 \
+  --builders "ssh://eu.nixbuild.net aarch64-linux - 100 1 big-parallel,benchmark" \
+  --system aarch64-linux \
+  -I nixpkgs=channel:nixos-20.03 \
+  --expr '((import <nixpkgs> {}).runCommand "test${toString builtins.currentTime}" {} "echo Hello nixbuild.net; touch $out")'
+```
+
+This should print "Hello nixbuild.net" (among other things) and drop an `result` symlink to an empty nix store path in your current directory. You're off to the races.
+
 ### Other Resources
 
 * [nix-starter-configs](https://github.com/Misterio77/nix-starter-configs/tree/main) from Gabriel Fontes, well-documented and modern flake setup.
@@ -63,5 +88,4 @@ TODO
 
 ### TODO
 
-* more fzf customization, bat previews, vim-plugins, etc.
 * Some basic CI for the repo with `nix flake check .#`
