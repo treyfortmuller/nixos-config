@@ -14,37 +14,40 @@
     ./hardware-configuration.nix
   ];
 
-  sierras = {
-    enable = true;
-    hostName = "ritter";
-    includeDockerSpecialisation = false;
-    laptop.enable = true;
-    laptop.internalDisplay = "eDP-1";
-    nvidia.proprietaryChaos = false;
-    nvidia.cudaDev = false;
-    embedded = {
-      iNav = true;
-      microbitV2 = true;
-    };
-    bluetooth.enable = true;
-    location.latitude = 33.657;
-    location.longitude = -117.787;
-    yubikeySupport = true;
-    obs.enable = false;
-    tailscale =
-      let
-        treyUser = config.users.users.trey;
-      in
-      {
+  sierras =
+    let
+      myUser = config.users.users.${config.sierras.user};
+    in
+    {
+      enable = true;
+      hostName = "ritter";
+      includeDockerSpecialisation = false;
+      laptop.enable = true;
+      laptop.internalDisplay = "eDP-1";
+      nvidia.proprietaryChaos = false;
+      nvidia.cudaDev = false;
+      embedded = {
+        iNav = true;
+        microbitV2 = true;
+      };
+      bluetooth.enable = true;
+      location.latitude = 33.657;
+      location.longitude = -117.787;
+      yubikeySupport = true;
+      obs.enable = false;
+      tailscale = {
         enable = true;
         authKeyFile = null; # TODO: can add in secrets management later
-        taildropPath = treyUser.home + "/taildrop";
-        taildropUser = treyUser.name;
+        taildropPath = myUser.home + "/taildrop";
+        taildropUser = myUser.name;
         hostName = "sierras-${config.networking.hostName}";
-        operator = treyUser.name;
+        operator = myUser.name;
       };
-    nixbuild-net.enable = true;
-  };
+      nixbuild-net = {
+        enable = true;
+        identityFilePath = myUser.home + "/.ssh/id_ed25519";
+      };
+    };
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;

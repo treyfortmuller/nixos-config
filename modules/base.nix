@@ -30,7 +30,7 @@ in
         I like to mix home-manager and OS-level configuration in modules, and I don't care about
         using my home-manager config outside of its NixOS deployment.
 
-        My personal machines just have a single user, if I had more user to add then
+        My personal machines just have a single user, if I had more users to add then
         home-manager.sharedModules and a reusable home-manager configuration might be useful.
       '';
       default = "trey";

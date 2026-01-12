@@ -9,28 +9,46 @@
 }:
 let
   cfg = config.sierras.nixbuild-net;
-  inherit (lib) mkIf mkEnableOption;
+  inherit (lib)
+    mkIf
+    mkEnableOption
+    mkOption
+    types
+    ;
 in
 {
   options.sierras.nixbuild-net = {
     enable = mkEnableOption "nixbuild.net support";
+
+    identityFilePath = mkOption {
+      type = types.path;
+      description = ''
+        Absolute path to the SSH private key registered with nixbuild.net.
+        Make sure the root user can reach this file since the nix-daemon will be
+        using it to dispatch builds.
+      '';
+      example = "/home/trey/.ssh/id_ed25519";
+    };
   };
 
   config = mkIf cfg.enable {
+    # Note, its totally fine to mix NixOS and home-manager SSH options, the home-manager
+    # options are user specific whereas these configs are global and applied with the
+    # correct precedence.
+    programs.ssh = {
+      extraConfig = ''
+        Host eu.nixbuild.net
+          PubkeyAcceptedKeyTypes ssh-ed25519
+          ServerAliveInterval 60
+          IPQoS throughput
+          IdentityFile ${cfg.identityFilePath}
+      '';
 
-    # TODO (tff): cleanup IdentityFile path
-    programs.ssh.extraConfig = ''
-      Host eu.nixbuild.net
-      PubkeyAcceptedKeyTypes ssh-ed25519
-      ServerAliveInterval 60
-      IPQoS throughput
-      IdentityFile /home/trey/.ssh/id_ed25519
-    '';
-
-    programs.ssh.knownHosts = {
-      nixbuild = {
-        hostNames = [ "eu.nixbuild.net" ];
-        publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPIQCZc54poJ8vqawd8TraNryQeJnvH1eLpIDgbiqymM";
+      knownHosts = {
+        nixbuild = {
+          hostNames = [ "eu.nixbuild.net" ];
+          publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPIQCZc54poJ8vqawd8TraNryQeJnvH1eLpIDgbiqymM";
+        };
       };
     };
 
@@ -43,8 +61,8 @@ in
 
       distributedBuilds = true;
       buildMachines = [
-        # Only sending builds to nixbuild.net for aarch64 native builds for now  
-        # 
+        # Only sending builds to nixbuild.net for aarch64 native builds for now
+        #
         # {
         #   hostName = "eu.nixbuild.net";
         #   system = "x86_64-linux";

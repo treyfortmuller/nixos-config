@@ -39,7 +39,7 @@ in
       options nvidia NVreg_RegistryDwords="PowerMizerEnable=0x1; PerfLevelSrc=0x2222; PowerMizerLevel=0x3; PowerMizerDefault=0x3; PowerMizerDefaultAC=0x3"
     '';
 
-    home-manager.users.trey =
+    home-manager.users.${config.sierras.user} =
       { pkgs, ... }:
       {
         wayland.windowManager.sway.extraSessionCommands = ''

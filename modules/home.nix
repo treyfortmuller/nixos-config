@@ -30,10 +30,7 @@ in
       # SSH configuration docs
       # https://linux.die.net/man/5/ssh_config
       programs.ssh = {
-        enable = false; # TODO (tff): resolve the home-manager vs. NixOS configuration for SSH
-        extraConfig = ''
-          ConnectTimeout=5
-        '';
+        enable = true;
 
         # The main SSH config is managed declaratively, but servers come and go so this is extra configuration
         # meant to be managed imperatively.
@@ -63,6 +60,10 @@ in
           controlPath = "~/.ssh/master-%r@%n:%p";
           controlPersist = "no";
         };
+
+        extraConfig = ''
+          ConnectTimeout=5
+        '';
       };
 
       programs.bash =
