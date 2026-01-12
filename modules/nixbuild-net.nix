@@ -81,6 +81,9 @@ in
             "big-parallel"
             # KVM isn't included in the quickstart guides suggested configuration but it turns out it is supported,
             # along with nixos-test if need be: https://docs.nixbuild.net/kvm-builds/#kvm-builds 
+            # Note: "KVM builds are only supported on x86_64-linux, not aarch64-linux."
+            # So that kinda sucks, if you try this the build is dispatched but you'll get a cryptic:
+            # "sandbox handshake error (max restarts exceeded)"
             "kvm"
           ];
         }
