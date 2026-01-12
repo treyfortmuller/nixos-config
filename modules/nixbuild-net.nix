@@ -79,6 +79,9 @@ in
           supportedFeatures = [
             "benchmark"
             "big-parallel"
+            # KVM isn't included in the quickstart guides suggested configuration but it turns out it is supported,
+            # along with nixos-test if need be: https://docs.nixbuild.net/kvm-builds/#kvm-builds 
+            "kvm"
           ];
         }
       ];
