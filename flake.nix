@@ -69,6 +69,7 @@
               ./modules/embedded.nix
               ./modules/bluetooth.nix
               ./modules/obs-studio.nix
+              ./modules/nixbuild-net.nix
             ];
 
             # final and prev, a.k.a. "self" and "super" respectively. This overlay

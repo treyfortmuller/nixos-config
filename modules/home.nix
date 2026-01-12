@@ -31,9 +31,6 @@ in
       # https://linux.die.net/man/5/ssh_config
       programs.ssh = {
         enable = true;
-        extraConfig = ''
-          ConnectTimeout=5
-        '';
 
         # The main SSH config is managed declaratively, but servers come and go so this is extra configuration
         # meant to be managed imperatively.
@@ -63,6 +60,10 @@ in
           controlPath = "~/.ssh/master-%r@%n:%p";
           controlPersist = "no";
         };
+
+        extraConfig = ''
+          ConnectTimeout=5
+        '';
       };
 
       programs.bash =
