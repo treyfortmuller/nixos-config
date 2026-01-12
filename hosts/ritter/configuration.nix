@@ -43,6 +43,7 @@
         hostName = "sierras-${config.networking.hostName}";
         operator = treyUser.name;
       };
+    nixbuild-net.enable = true;
   };
 
   # Use the systemd-boot EFI boot loader.

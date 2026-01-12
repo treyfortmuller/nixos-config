@@ -30,7 +30,7 @@ in
       # SSH configuration docs
       # https://linux.die.net/man/5/ssh_config
       programs.ssh = {
-        enable = true;
+        enable = false; # TODO (tff): resolve the home-manager vs. NixOS configuration for SSH
         extraConfig = ''
           ConnectTimeout=5
         '';
