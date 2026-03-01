@@ -377,7 +377,6 @@ in
         fzf
         bat
         ranger
-        awscli2
         cntr
         ripgrep
         lsof
