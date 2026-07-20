@@ -301,6 +301,7 @@ in
     environment.systemPackages =
       with pkgs;
       [
+        unstable.claude-code
         unstable.via
         exfatprogs
         nixfmt-tree # "treefmt" on your PATH

@@ -52,6 +52,18 @@
             inherit inputs self;
           };
         };
+
+        # Intel NUC 11 Essential Mini PC (SWNUC11ATKC4000)
+        sonora = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            self.nixosModules.default
+            ./hosts/sonora/configuration.nix
+          ];
+          specialArgs = {
+            inherit inputs self;
+          };
+        };
       };
 
       nixosModules = {
@@ -70,6 +82,7 @@
               ./modules/bluetooth.nix
               ./modules/obs-studio.nix
               ./modules/nixbuild-net.nix
+              ./modules/home-auto.nix
             ];
 
             # final and prev, a.k.a. "self" and "super" respectively. This overlay
